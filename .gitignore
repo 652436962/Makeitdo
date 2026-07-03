@@ -1,0 +1,13 @@
+*.bin
+*.elf
+*.map
+*.merged.bin
+*.partitions.bin
+*.bootloader.bin
+build/
+.qoder/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
