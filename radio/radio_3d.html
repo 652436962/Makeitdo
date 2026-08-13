@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Makeitdo 开源掌机 · 3D 效果图</title>
+<style>
+  :root{
+    --bg:#12151a; --panel:rgba(28,32,40,.86); --line:rgba(255,255,255,.08);
+    --txt:#e8eaed; --sub:#9aa3af; --acc:#35d0a0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:radial-gradient(1200px 700px at 50% 20%, #1d232d 0%, var(--bg) 60%);font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:var(--txt)}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  .hud{position:fixed;z-index:10;user-select:none}
+
+  /* 顶部标题 */
+  #title{top:16px;left:20px;display:flex;flex-direction:column;gap:4px}
+  #title h1{font-size:19px;font-weight:600;letter-spacing:.5px}
+  #title h1 span{color:var(--acc)}
+  #title .meta{font-size:12px;color:var(--sub);display:flex;gap:14px;flex-wrap:wrap}
+  #title .meta b{color:var(--txt);font-weight:500}
+
+  /* 视角按钮 */
+  #views{top:16px;right:20px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .vbtn{background:var(--panel);border:1px solid var(--line);color:var(--txt);
+    padding:8px 16px;border-radius:9px;font-size:13px;cursor:pointer;
+    backdrop-filter:blur(8px);transition:all .18s;min-width:96px;text-align:left}
+  .vbtn:hover{background:rgba(53,208,160,.16);border-color:rgba(53,208,160,.5)}
+  .vbtn.on{background:rgba(53,208,160,.22);border-color:var(--acc);color:#fff}
+
+  /* 图例 */
+  #legend{right:20px;top:50%;transform:translateY(-50%);background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:12px;
+    width:196px;backdrop-filter:blur(8px)}
+  #legend h3{font-size:13px;margin-bottom:10px;font-weight:600}
+  #legend .item{display:flex;align-items:center;gap:9px;margin-bottom:7px;color:var(--sub)}
+  #legend .sw{width:14px;height:14px;border-radius:4px;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+  #legend .item:last-child{margin-bottom:0}
+
+  /* 底部提示 */
+  #hint{bottom:14px;left:50%;transform:translateX(-50%);background:var(--panel);
+    border:1px solid var(--line);border-radius:999px;padding:7px 18px;font-size:12px;color:var(--sub);
+    backdrop-filter:blur(8px);white-space:nowrap}
+  #hint b{color:var(--txt)}
+
+  /* 标注开关 */
+  #toolbar{right:20px;bottom:16px;display:flex;gap:8px;align-items:center}
+  .tbtn{background:var(--panel);border:1px solid var(--line);color:var(--sub);
+    padding:7px 14px;border-radius:999px;font-size:12px;cursor:pointer;backdrop-filter:blur(8px);transition:all .18s}
+  .tbtn:hover{color:var(--txt);border-color:rgba(255,255,255,.25)}
+  .tbtn.on{background:rgba(53,208,160,.22);border-color:var(--acc);color:#fff}
+
+  #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);z-index:99;transition:opacity .5s;font-size:14px;color:var(--sub)}
+  #load.hide{opacity:0;pointer-events:none}
+  #load .sp{width:34px;height:34px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--acc);
+    border-radius:50%;animation:rot 1s linear infinite;margin-right:14px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  @media(max-width:900px){#legend{display:none}#views{right:12px;top:12px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="hud" id="title">
+  <h1>MAKEITDO <span>无线电遥控器</span></h1>
+  <div class="meta">
+    <span>尺寸 <b>200×95×16 mm</b></span>
+    <span>屏幕 <b>5.5″ AMOLED</b></span>
+    <span>链路 <b>ELRS 2.4G / 4G</b></span>
+    <span>CPU <b>RK3566</b></span>
+  </div>
+</div>
+
+<div class="hud" id="views">
+  <div class="vbtn on" data-cam="iso">◢ 3/4 视角</div>
+  <div class="vbtn" data-cam="front">▣ 正面</div>
+  <div class="vbtn" data-cam="back">▨ 背面</div>
+  <div class="vbtn" data-cam="top">◇ 顶部</div>
+  <div class="vbtn" data-cam="side">◈ 侧面</div>
+  <div class="vbtn" data-cam="bottom">▤ 底部</div>
+</div>
+
+<div class="hud" id="legend">
+  <h3>材质 · 部件图例</h3>
+  <div class="item"><span class="sw" style="background:#262a31"></span>PC+ABS 磨砂外壳</div>
+  <div class="item"><span class="sw" style="background:#0b0d10"></span>玻璃面板 · AMOLED 屏</div>
+  <div class="item"><span class="sw" style="background:#2e2e2e"></span>摇杆硅胶帽</div>
+  <div class="item"><span class="sw" style="background:#22b14c"></span>A 键 · 绿</div>
+  <div class="item"><span class="sw" style="background:#ed1c24"></span>B 键 · 红</div>
+  <div class="item"><span class="sw" style="background:#0072bc"></span>X 键 · 蓝</div>
+  <div class="item"><span class="sw" style="background:#ffd200"></span>Y 键 · 黄</div>
+  <div class="item"><span class="sw" style="background:#c9ccd2"></span>SMA 天线座 · 金属</div>
+  <div class="item"><span class="sw" style="background:#e34a2a"></span>ELRS 天线</div>
+  <div class="item"><span class="sw" style="background:#101214"></span>NVMe 散热舱盖</div>
+</div>
+
+<div class="hud" id="toolbar">
+  <div class="tbtn" id="lblBtn">标注 OFF</div>
+  <div class="tbtn" id="rotBtn">自动旋转 ON</div>
+</div>
+
+<div class="hud" id="hint"><b>左键拖拽</b> 旋转 · <b>滚轮</b> 缩放 · <b>右键拖拽</b> 平移</div>
+
+<div id="load"><div class="sp"></div>正在构建 3D 模型…</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./lib/three/three.module.js",
+    "three/addons/": "./lib/three/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/RoundedBoxGeometry.js';
+
+/* ============================================================
+   场景 / 渲染器 / 相机
+   ============================================================ */
+const app = document.getElementById('app');
+const W = app.clientWidth, H = app.clientHeight;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x12151a);
+scene.fog = new THREE.Fog(0x12151a, 1200, 2200);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+app.appendChild(renderer.domElement);
+
+const camera = new THREE.PerspectiveCamera(40, W/H, 1, 5000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 120;
+controls.maxDistance = 900;
+controls.target.set(100, 0, 46);
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.4;
+
+/* ============================================================
+   材质
+   ============================================================ */
+const M = {
+  shell:   new THREE.MeshStandardMaterial({ color:0x2a2e35, roughness:0.62, metalness:0.05 }),
+  shellD:  new THREE.MeshStandardMaterial({ color:0x22252b, roughness:0.7,  metalness:0.05 }),
+  glass:   new THREE.MeshStandardMaterial({ color:0x050607, roughness:0.12, metalness:0.3,  transparent:true, opacity:0.92 }),
+  screen:  new THREE.MeshStandardMaterial({ color:0xffffff, roughness:0.25, metalness:0 }),
+  keyBlk:  new THREE.MeshStandardMaterial({ color:0x1b1d20, roughness:0.45, metalness:0.15 }),
+  keySil:  new THREE.MeshStandardMaterial({ color:0x2f3136, roughness:0.85, metalness:0 }),
+  metal:   new THREE.MeshStandardMaterial({ color:0xc9ccd2, roughness:0.25, metalness:0.9 }),
+  metalD:  new THREE.MeshStandardMaterial({ color:0x8f959e, roughness:0.4,  metalness:0.8 }),
+  ledG:    new THREE.MeshStandardMaterial({ color:0x39ff88, emissive:0x1dff7a, emissiveIntensity:2.2, roughness:0.3 }),
+  ledB:    new THREE.MeshStandardMaterial({ color:0x5ab0ff, emissive:0x2f7dff, emissiveIntensity:2.2, roughness:0.3 }),
+  btn: { A:new THREE.MeshStandardMaterial({color:0x22b14c, roughness:0.35, metalness:0.05}),
+         B:new THREE.MeshStandardMaterial({color:0xed1c24, roughness:0.35, metalness:0.05}),
+         X:new THREE.MeshStandardMaterial({color:0x0072bc, roughness:0.35, metalness:0.05}),
+         Y:new THREE.MeshStandardMaterial({color:0xffd200, roughness:0.35, metalness:0.05}) },
+  antRed:  new THREE.MeshStandardMaterial({ color:0xe34a2a, roughness:0.5, metalness:0.1 }),
+  antBlk:  new THREE.MeshStandardMaterial({ color:0x14161a, roughness:0.7, metalness:0 }),
+  grill:   new THREE.MeshStandardMaterial({ color:0x17191d, roughness:0.8, metalness:0 }),
+};
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+const radio = new THREE.Group();
+scene.add(radio);
+const mm = 1; // 1 unit = 1mm
+
+function add(geo, mat, x, y, z, rx=0, ry=0, rz=0, group=radio){
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true; m.receiveShadow = true;
+  group.add(m);
+  return m;
+}
+function rbox(w,h,d,r,seg=2){ return new RoundedBoxGeometry(w,h,d,seg,r); }
+function cyl(rTop,rBot,h,seg=24){ return new THREE.CylinderGeometry(rTop,rBot,h,seg); }
+
+/* ============================================================
+   机身主体 200×95×16（主体高 92 + 肩键 3）
+   ============================================================ */
+add(rbox(200,16,92,5,3), M.shell, 100, 8, 46);
+
+/* —— 中缝线（上下壳分模线） —— */
+add(rbox(200,0.25,92,0,1), M.shellD, 100, 8.05, 46);
+
+/* —— 底部握把隆起（左右，后盖侧鼓出，R15 弧度） —— */
+const gripGeo = new THREE.CylinderGeometry(16, 16, 46, 20, 1, false, 0, Math.PI);
+const gripL = new THREE.Mesh(gripGeo, M.shellD);
+gripL.position.set(24, -5, 30); gripL.rotation.set(Math.PI/2, 0, 0); gripL.castShadow = true; radio.add(gripL);
+const gripR = gripL.clone(); gripR.position.set(176, -5, 30); gripR.rotation.set(Math.PI/2, 0, Math.PI); radio.add(gripR);
+add(rbox(44,6,58,6,2), M.shellD, 24, -3, 30);
+add(rbox(44,6,58,6,2), M.shellD, 176, -3, 30);
+
+/* ============================================================
+   屏幕 5.5″（开口135×78 / 玻璃141×84 / 有效121.7×68.5）
+   ============================================================ */
+const scrGroup = new THREE.Group();
+radio.add(scrGroup);
+
+/* 玻璃面板 */
+add(rbox(141, 1.6, 84, 3, 2), M.glass, 100, 16.8, 47.5, 0,0,0, scrGroup);
+/* 屏幕黑框 */
+add(rbox(135, 0.5, 78, 2, 2), new THREE.MeshStandardMaterial({color:0x000000, roughness:0.2, metalness:0.4}), 100, 17.1, 47.5, 0,0,0, scrGroup);
+
+/* —— 屏幕显示画面（CanvasTexture 绘制 ELRS 遥测 HUD） —— */
+function makeScreenTexture(){
+  const c = document.createElement('canvas'); c.width = 1280; c.height = 720;
+  const g = c.getContext('2d');
+
+  /* 背景：模拟航拍画面 */
+  const sky = g.createLinearGradient(0,0,0,720);
+  sky.addColorStop(0,'#0e2a3a'); sky.addColorStop(0.55,'#2a6e4f'); sky.addColorStop(1,'#3d2b1e');
+  g.fillStyle = sky; g.fillRect(0,0,1280,720);
+  /* 云 */
+  g.fillStyle = 'rgba(255,255,255,0.06)';
+  for(let i=0;i<14;i++){ g.beginPath(); g.ellipse(60+i*95+(i%3)*30, 90+((i*37)%120), 46, 12, 0, 0, Math.PI*2); g.fill(); }
+
+  /* 中央十字准星 */
+  g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 3;
+  const cx=640, cy=360;
+  g.beginPath(); g.moveTo(cx-34,cy); g.lineTo(cx-12,cy); g.moveTo(cx+12,cy); g.lineTo(cx+34,cy);
+  g.moveTo(cx,cy-34); g.lineTo(cx,cy-12); g.moveTo(cx,cy+12); g.lineTo(cx,cy+34); g.stroke();
+  g.beginPath(); g.arc(cx,cy,7,0,Math.PI*2); g.stroke();
+
+  /* 四角框 */
+  g.lineWidth = 4; g.strokeStyle = 'rgba(255,255,255,0.75)';
+  const ox=180, oy=150, ow=920, oh=420;
+  g.strokeRect(ox,oy,ow,oh);
+  g.beginPath();
+  [[ox,oy],[ox+ow,oy],[ox,oy+oh],[ox+ow,oy+oh]].forEach(([x,y],i)=>{
+    g.moveTo(x + (i&1? -30:30), y); g.lineTo(x, y); g.lineTo(x, y + (i&2? -30:30));
+  });
+  g.stroke();
+
+  /* 地平线指示 */
+  g.fillStyle = 'rgba(255,255,255,0.7)'; g.font = '16px monospace';
+  g.fillText('ROLL  0.0°   PITCH  0.0°', cx-110, oy-18);
+
+  /* 顶部状态栏 */
+  g.fillStyle = 'rgba(0,0,0,0.45)';
+  g.fillRect(0,0,1280,54);
+  g.fillStyle = '#35d0a0'; g.font = 'bold 26px "Segoe UI",sans-serif';
+  g.fillText('MAKEITDO · ELRS 2.4G', 24, 38);
+  g.fillStyle = 'rgba(255,255,255,0.92)'; g.font = '22px monospace';
+  g.fillText('13:45:22', 1120, 38);
+  /* 信号条 */
+  for(let i=0;i<4;i++){ g.fillStyle = i<3?'#35d0a0':'rgba(255,255,255,0.25)';
+    g.fillRect(1000+i*22, 38-i*8, 14, 8+i*8); }
+
+  /* 左下 OSG */
+  g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(24, 600, 380, 96);
+  g.font = 'bold 30px "Consolas",monospace'; g.fillStyle = '#8dffd0';
+  g.fillText('ALT  122.4 m', 44, 642);
+  g.fillStyle = '#ffd76a'; g.fillText('SPD  13.6 m/s', 44, 682);
+
+  /* 右下 RSSI / 电压 */
+  g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(876, 600, 380, 96);
+  g.font = 'bold 30px "Consolas",monospace'; g.fillStyle = '#ff7a7a';
+  g.fillText('RSSI  -58 dBm', 896, 642);
+  g.fillStyle = '#7ab8ff'; g.fillText('VBAT  8.32 V', 896, 682);
+
+  /* 底部通道条 */
+  g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(0, 706, 1280, 14);
+  g.fillStyle = '#35d0a0';
+  for(let i=0;i<6;i++) g.fillRect(90+i*200+ (i%2? 60:20), 709, 12, 8);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+const screenMat = new THREE.MeshStandardMaterial({ map:makeScreenTexture(), roughness:0.22, metalness:0, emissive:0xffffff, emissiveMap:makeScreenTexture(), emissiveIntensity:0.85 });
+const screenMesh = add(rbox(121.7, 0.4, 68.5, 1, 1), screenMat, 100, 17.5, 47.5, 0,0,0, scrGroup);
+
+/* 扬声器网孔（前面板底部两侧） */
+const holesGeo = new THREE.CircleGeometry(1.1, 10);
+for(const [hx0, n] of [[34, 12],[166, 12]]){
+  for(let i=0;i<n;i++){
+    const h = new THREE.Mesh(holesGeo, M.shellD);
+    h.position.set(hx0, 16.1, 14 + Math.floor(i/4)*7 + (i%4)*2.4);
+    h.rotation.set(-Math.PI/2, 0, 0);
+    radio.add(h);
+  }
+}
+
+/* ============================================================
+   控制区 —— 摇杆 / 十字键 / ABXY / 功能键
+   ============================================================ */
+function stick(x, z){
+  const g = new THREE.Group(); g.position.set(x, 16, z); radio.add(g);
+  /* 面板开口环 */
+  add(cyl(11.5, 12.5, 1.6), M.shellD, 0, 0.8, 0, 0,0,0, g);
+  /* 底座 */
+  add(cyl(9, 11, 3), M.shell, 0, 3.1, 0, 0,0,0, g);
+  /* 摇杆帽 */
+  add(cyl(7.8, 8.2, 3.2), M.keySil, 0, 6.2, 0, 0,0,0, g);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(7.9, 24, 12, 0, Math.PI*2, 0, Math.PI/2.3), M.keySil);
+  cap.position.set(0, 8.2, 0); cap.castShadow = true; g.add(cap);
+  /* 防滑纹 */
+  add(new THREE.TorusGeometry(5.2, 0.55, 8, 24), M.keyBlk, 0, 7.6, 0, Math.PI/2, 0, 0, g);
+}
+stick(16, 68);
+stick(184, 68);
+
+/* 十字键 */
+function dpad(x, z){
+  const g = new THREE.Group(); g.position.set(x, 16, z); radio.add(g);
+  const arm = rbox(10, 2.6, 34, 2, 2);
+  add(arm, M.keyBlk, 0, 1.3, 0, 0,0,0, g);
+  add(arm.clone(), M.keyBlk, 0, 1.3, 0, 0,0,Math.PI/2, g);
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 5.2, 2.8, 20), M.keyBlk);
+  c.position.set(0, 1.4, 0); c.castShadow = true; g.add(c);
+  /* 方向指示 */
+  ['▲','▼','◀','▶'].forEach((ch,i)=>{
+    const cv = document.createElement('canvas'); cv.width=32; cv.height=32;
+    const cg = cv.getContext('2d'); cg.fillStyle='rgba(255,255,255,0.55)';
+    cg.font='bold 22px sans-serif'; cg.textAlign='center'; cg.textBaseline='middle';
+    cg.fillText(ch, 16, 16);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, depthWrite:false }));
+    s.scale.set(5.2, 5.2, 1);
+    const a = i*Math.PI/2;
+    s.position.set(Math.sin(a)*11.5, 2.9, Math.cos(a)*11.5);
+    g.add(s);
+  });
+}
+dpad(16, 30);
+
+/* ABXY */
+function abxyBtn(x, z, key){
+  const g = new THREE.Group(); g.position.set(x, 16, z); radio.add(g);
+  add(cyl(6.4, 7.2, 2.2), M.shellD, 0, 1.1, 0, 0,0,0, g);
+  const b = new THREE.Mesh(cyl(6, 6, 2.6), M.btn[key]);
+  b.position.set(0, 2.7, 0); b.castShadow = true; g.add(b);
+  const top = new THREE.Mesh(new THREE.SphereGeometry(6, 20, 10, 0, Math.PI*2, 0, Math.PI/2.6), M.btn[key]);
+  top.position.set(0, 4.2, 0); top.castShadow = true; g.add(top);
+}
+abxyBtn(176, 30, 'A');
+abxyBtn(192, 30, 'B');
+abxyBtn(176, 22, 'X');
+abxyBtn(192, 22, 'Y');
+
+/* 功能键 Sel / Home / Start */
+function fkey(x, z, big=false){
+  const g = new THREE.Group(); g.position.set(x, 16, z); radio.add(g);
+  add(rbox(6, 1.6, 6, 1.2, 2), M.shellD, 0, 0.8, 0, 0,0,0, g);
+  const r = big? 4.4 : 3.4;
+  const b = new THREE.Mesh(cyl(r, r, 1.8), M.keySil);
+  b.position.set(0, 2, 0); b.castShadow = true; g.add(b);
+}
+fkey(75, 8);   /* Select */
+fkey(125, 8);  /* Start */
+fkey(100, 8, true); /* Home */
+
+/* ============================================================
+   肩键 L / LZ / R / RZ（顶部，突出上沿 3mm）
+   ============================================================ */
+function shoulder(x, z, outer=false){
+  const g = new THREE.Group(); g.position.set(x, 16, z); radio.add(g);
+  add(rbox(14, 3.2, 8, 1.5, 2), M.shell, 0, 1.6, outer? 1.5 : 0, 0,0,0, g);
+  add(rbox(10, 3.6, 4, 1, 2), M.keySil, 0, 3.2, outer? 3 : 1, 0,0,0, g);
+}
+shoulder(14, 90);    /* L */
+shoulder(6, 92, true);  /* LZ */
+shoulder(186, 90);   /* R */
+shoulder(194, 92, true); /* RZ */
+
+/* ============================================================
+   顶部边缘 —— 电源键 / LED
+   ============================================================ */
+add(rbox(6, 2.4, 3, 1, 2), M.keySil, 100, 17, 95.6);
+add(cyl(1.3, 1.3, 1.2, 12), M.ledG, 110, 17.2, 95.4);
+add(cyl(1.3, 1.3, 1.2, 12), M.ledB, 120, 17.2, 95.4);
+
+/* 侧面音量键（左侧 X=0 边缘） */
+add(rbox(2.2, 2.4, 5, 1, 2), M.keySil, 0.8, 16, 42);
+add(rbox(2.2, 2.4, 5, 1, 2), M.keySil, 0.8, 16, 50);
+
+/* ============================================================
+   底部边缘 —— USB-C / 3.5mm / TF
+   ============================================================ */
+add(rbox(9, 5, 2.2, 1, 2), M.metalD, 80, 8, 1.2);
+const jack = add(cyl(1.9, 1.9, 3, 14), M.metalD, 100, 8, 1.4, Math.PI/2, 0, 0);
+add(rbox(7, 4, 1.6, 1, 2), M.shellD, 150, 8, 1.1);
+
+/* ============================================================
+   背面 —— IO 区 / 天线 / NVMe / 散热格栅 / M 键
+   ============================================================ */
+/* IO 凹陷面板 */
+add(rbox(82, 0.6, 30, 2, 2), M.shellD, 84, 0.3, 88);
+
+/* 接口块 */
+function io(x, z, w, d){
+  add(rbox(w, 0.8, d, 1, 2), M.metalD, x, 0.7, z);
+}
+io(30, 84, 17, 8);    /* USB-A */
+io(65, 84, 9, 4);     /* USB-C */
+io(92, 82, 12, 6);    /* MiniHDMI */
+io(122, 82, 54, 6);   /* GPIO 40P */
+add(rbox(17, 0.9, 8, 0.8, 2), M.metal, 30, 0.9, 84);
+add(rbox(9, 0.9, 4, 0.8, 2), M.metal, 65, 0.9, 84);
+
+/* —— SMA 天线座 + 天线 —— */
+function antenna(x, z, mat, len, isElrs){
+  const g = new THREE.Group(); g.position.set(x, 0, z); radio.add(g);
+  /* 座 */
+  add(cyl(3.4, 3.8, 5, 16), M.metal, 0, -2.5, 0, Math.PI/2, 0, 0, g);
+  add(cyl(3.4, 3.4, 1.5, 16), M.metal, 0, -0.9, 0, Math.PI/2, 0, 0, g);
+  /* 水平段 + 弯折 */
+  const bend = new THREE.Mesh(cyl(1.7, 1.7, 10, 10), mat);
+  bend.position.set(0, -6, 0); bend.rotation.set(Math.PI/2, 0, 0); bend.castShadow = true; g.add(bend);
+  const whip = new THREE.Mesh(cyl(1.7, 1.5, len, 10), mat);
+  whip.position.set(0, -6, -len/2 + 2); whip.castShadow = true; g.add(whip);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(1.9, 12, 8), mat);
+  tip.position.set(0, -6, -len + 2); tip.castShadow = true; g.add(tip);
+  /* 天线向内（指向机身）弯折 */
+  const dir = isElrs ? -1 : 1;
+  bend.position.x = dir * 6;
+  whip.position.x = dir * 6; whip.position.z = -len/2 + 2;
+  tip.position.x = dir * 6; tip.position.z = -len + 2;
+}
+antenna(30, 92, M.antRed, 42, true);   /* ELRS 鞭状 */
+antenna(170, 92, M.antBlk, 26, false); /* 4G 胶棒 */
+
+/* —— NVMe 散热舱盖（80×26 中央） —— */
+const nvme = add(rbox(80, 1.3, 26, 4, 2), M.shell, 100, -0.65, 32);
+add(rbox(56, 1.6, 14, 2, 2), M.grill, 100, -0.8, 33);
+add(cyl(1.1, 1.1, 1, 10), M.metalD, 62, -1.4, 46);
+add(cyl(1.1, 1.1, 1, 10), M.metalD, 138, -1.4, 46);
+add(cyl(1.1, 1.1, 1, 10), M.metalD, 62, -1.4, 18);
+add(cyl(1.1, 1.1, 1, 10), M.metalD, 138, -1.4, 18);
+
+/* —— 散热格栅（两区百叶窗） —— */
+function grill(x0, x1, z0, z1){
+  const n = 5, span = z1 - z0;
+  for(let i=0;i<n;i++){
+    add(rbox(x1-x0, 0.5, 1.1, 0.4, 1), M.grill, (x0+x1)/2, -0.35, z0 + span*(i+0.5)/n);
+  }
+}
+grill(72, 128, 10, 17);
+grill(80, 120, 20, 24);
+
+/* —— 背部 M1~M4 拨片 —— */
+function mkey(x, z){
+  add(rbox(12, 0.9, 11, 1.5, 2), M.keyBlk, x, -0.45, z);
+  add(rbox(12, 1.4, 3, 1, 2), M.keySil, x, -0.9, z);
+}
+mkey(25, 45); mkey(25, 35);
+mkey(175, 45); mkey(175, 35);
+
+/* —— 背板铭牌 —— */
+(function(){
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#171a1f'; g.fillRect(0,0,512,96);
+  g.strokeStyle = 'rgba(255,255,255,0.25)'; g.lineWidth = 2; g.strokeRect(8,8,496,80);
+  g.fillStyle = '#9aa3af'; g.font = 'bold 40px "Segoe UI",sans-serif'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillText('MAKEITDO · RADIO · ELRS', 256, 48);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const pl = new THREE.Mesh(rbox(74, 0.4, 14, 1, 1), new THREE.MeshStandardMaterial({ map:tex, roughness:0.6 }));
+  pl.position.set(100, -0.25, 60); pl.castShadow = true; radio.add(pl);
+})();
+
+/* ============================================================
+   部件标注（Sprite）
+   ============================================================ */
+const labels = new THREE.Group();
+scene.add(labels);
+function label(x, y, z, text, offset=[0,-18]){
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  ctx.font = '600 44px "Segoe UI","PingFang SC",sans-serif';
+  const w = ctx.measureText(text).width;
+  cv.width = Math.ceil(w) + 60; cv.height = 72;
+  const g = cv.getContext('2d');
+  g.font = '600 44px "Segoe UI","PingFang SC",sans-serif';
+  g.fillStyle = 'rgba(20,24,30,0.88)';
+  g.beginPath(); g.roundRect(6, 8, cv.width-12, 46, 12); g.fill();
+  g.fillStyle = '#e8eaed'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, cv.width/2, 32);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false }));
+  sp.scale.set(cv.width/30, 72/30, 1);
+  sp.position.set(x, y, z);
+  labels.add(sp);
+}
+const L = [
+  ['屏幕 5.5″ AMOLED', 100, 40, 120],
+  ['左摇杆', 16, 30, 110],
+  ['右摇杆', 184, 30, 110],
+  ['十字键', 16, 30, 60],
+  ['ABXY 动作键', 184, 26, 60],
+  ['肩键 L/R', 100, 40, 160],
+  ['扩展 IO · GPIO40', 84, -12, 132],
+  ['ELRS 天线', 30, -24, 110],
+  ['4G 天线', 170, -24, 110],
+  ['NVMe 散热舱', 100, -14, 74],
+  ['散热格栅', 100, -16, 44],
+  ['电源键', 100, 24, 132],
+];
+for(const [t,x,y,z] of L) label(x, y, z, t);
+labels.visible = false;
+
+/* ============================================================
+   地面 / 灯光
+   ============================================================ */
+const ground = new THREE.Mesh(new THREE.CircleGeometry(700, 48),
+  new THREE.MeshStandardMaterial({ color:0x1a1e24, roughness:0.9, metalness:0, transparent:true, opacity:0.9 }));
+ground.rotation.x = -Math.PI/2;
+ground.position.set(100, -26, 20);
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* 网格线 */
+const grid = new THREE.GridHelper(900, 36, 0x2b3340, 0x232a34);
+grid.position.set(100, -25.9, 20);
+scene.add(grid);
+
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x2a2118, 0.75));
+const key = new THREE.DirectionalLight(0xffffff, 2.4);
+key.position.set(320, 420, 260); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -260; key.shadow.camera.right = 260;
+key.shadow.camera.top = 260; key.shadow.camera.bottom = -260;
+key.shadow.camera.near = 50; key.shadow.camera.far = 1200;
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x88aaff, 0.6);
+fill.position.set(-280, 160, -160); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffb37a, 0.5);
+rim.position.set(-60, -200, 260); scene.add(rim);
+const amb = new THREE.AmbientLight(0xffffff, 0.16);
+scene.add(amb);
+
+/* ============================================================
+   相机视角预设 + UI
+   ============================================================ */
+const C = {
+  iso:    { pos:[350, 260, 240], tgt:[100, -6, 46] },
+  front:  { pos:[100, 300, 46],  tgt:[100, 0, 46] },
+  back:   { pos:[100, -300, 46], tgt:[100, 0, 46] },
+  top:    { pos:[100, 30, 300],  tgt:[100, 0, 46] },
+  side:   { pos:[380, 20, 46],   tgt:[100, 0, 46] },
+  bottom: { pos:[100, -30, -260], tgt:[100, 0, 46] },
+};
+function fly(name){
+  const c = C[name];
+  const from = camera.position.clone(), fromT = controls.target.clone();
+  const to = new THREE.Vector3(...c.pos), toT = new THREE.Vector3(...c.tgt);
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.toggle('on', b.dataset.cam===name));
+  const t0 = performance.now(), dur = 650;
+  function step(t){
+    const k = Math.min(1, (t - t0)/dur);
+    const e = 1 - Math.pow(1-k, 3);
+    camera.position.lerpVectors(from, to, e);
+    controls.target.lerpVectors(fromT, toT, e);
+    if(k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+document.querySelectorAll('.vbtn').forEach(b=>b.addEventListener('click', ()=>fly(b.dataset.cam)));
+
+const rotBtn = document.getElementById('rotBtn');
+let autoRotate = true;
+rotBtn.addEventListener('click', ()=>{
+  autoRotate = !autoRotate;
+  controls.autoRotate = autoRotate;
+  rotBtn.textContent = autoRotate ? '自动旋转 ON' : '自动旋转 OFF';
+  rotBtn.classList.toggle('on', autoRotate);
+});
+const lblBtn = document.getElementById('lblBtn');
+lblBtn.addEventListener('click', ()=>{
+  labels.visible = !labels.visible;
+  lblBtn.textContent = labels.visible ? '标注 ON' : '标注 OFF';
+  lblBtn.classList.toggle('on', labels.visible);
+});
+rotBtn.classList.add('on');
+
+window.addEventListener('resize', ()=>{
+  const w = app.clientWidth, h = app.clientHeight;
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+/* ============================================================
+   动画循环
+   ============================================================ */
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* 初始视角 */
+camera.position.set(350, 260, 240);
+controls.target.set(100, -6, 46);
+document.getElementById('load').classList.add('hide');
+animate();
+</script>
+</body>
+</html>

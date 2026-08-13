@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELRS 遥控控制台 · Qt 界面效果图</title>
+<style>
+  :root{
+    --bg:#232629; --win:#2a2d30; --panel:#31363b; --panel2:#2c3136;
+    --line:#3d434a; --line2:#464d55;
+    --txt:#eff0f1; --sub:#8a929c; --dim:#6b7380;
+    --acc:#3daee9; --acc2:#2980b9; --green:#27ae60; --red:#da4453; --yel:#fdbc4b;
+    --mono:'Consolas','JetBrains Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:auto;background:radial-gradient(1400px 800px at 50% 0%, #1c1f22 0%, #151719 60%);
+    font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:var(--txt);
+    display:flex;align-items:center;justify-content:center;padding:26px}
+
+  /* ===== 应用窗口 ===== */
+  #win{width:1180px;height:760px;background:var(--win);border:1px solid #1a1d20;border-radius:10px;
+    box-shadow:0 24px 70px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;
+    transition:width .35s,height .35s}
+  #win.portrait{width:420px;height:760px}
+
+  /* 标题栏 */
+  #bar{height:40px;flex:none;display:flex;align-items:center;padding:0 10px 0 14px;
+    background:linear-gradient(180deg,#31363b,#2a2d30);border-bottom:1px solid #1e2124}
+  #bar .ttl{font-size:13px;font-weight:600;letter-spacing:.3px;color:#dfe3e7;display:flex;align-items:center;gap:8px}
+  #bar .ttl .ic{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--acc),#7fb4ff);position:relative}
+  #bar .ttl .ic::after{content:'';position:absolute;left:5px;top:6px;width:6px;height:4px;background:#fff;border-radius:2px}
+  #bar .st{flex:1;text-align:center;font-size:11px;color:var(--dim)}
+  #bar .wbtn{display:flex;gap:2px}
+  #bar .wbtn span{width:38px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub);
+    border-radius:5px;cursor:pointer}
+  #bar .wbtn span:hover{background:#3d434a;color:#fff}
+  #bar .wbtn .x:hover{background:var(--red)}
+
+  /* 布局 */
+  #body{flex:1;display:flex;min-height:0}
+  #nav{width:172px;flex:none;background:var(--panel);border-right:1px solid #1e2124;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+  #nav .g{font-size:10px;color:var(--dim);padding:10px 10px 4px;letter-spacing:1px}
+  .navit{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;
+    font-size:13px;color:#c4ccd4;transition:all .12s;border:1px solid transparent}
+  .navit .ico{width:16px;text-align:center;color:var(--dim);font-size:14px}
+  .navit:hover{background:#3a4047;color:#fff}
+  .navit.on{background:linear-gradient(180deg,#3daee933,#3daee91f);border-color:#3daee966;color:#7fc9f7}
+  .navit.on .ico{color:var(--acc)}
+  #nav .foot{margin-top:auto;padding:10px 12px;font-size:10px;color:var(--dim);border-top:1px solid #22262a;display:flex;flex-direction:column;gap:4px}
+  #nav .foot .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+
+  #content{flex:1;overflow-y:auto;padding:18px 20px;min-width:0;scrollbar-width:thin;scrollbar-color:#464d55 transparent}
+  #content::-webkit-scrollbar{width:8px}
+  #content::-webkit-scrollbar-thumb{background:#464d55;border-radius:4px}
+
+  /* 通用控件 */
+  .pg{display:none}
+  .pg.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2{font-size:16px;margin-bottom:4px;font-weight:600}
+  .sub{font-size:12px;color:var(--sub);margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+  .card h4{font-size:12px;color:var(--sub);font-weight:600;margin-bottom:12px;letter-spacing:.5px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .fld{flex:1;min-width:150px}
+  .lbl{font-size:11px;color:var(--sub);margin-bottom:6px}
+  select,input[type=text]{width:100%;background:#2a2d30;border:1px solid var(--line2);color:var(--txt);
+    border-radius:6px;padding:8px 10px;font-size:13px;outline:none}
+  select:focus,input:focus{border-color:var(--acc)}
+  .btn{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line2);
+    color:#dfe3e7;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;transition:all .12s;user-select:none}
+  .btn:hover{background:#3a4047;border-color:#58606a}
+  .btn.pri{background:linear-gradient(180deg,#4ab0e8,#2f93c9);border-color:#2680b5;color:#fff;font-weight:600}
+  .btn.pri:hover{background:linear-gradient(180deg,#5abcf0,#37a2d8)}
+  .btn.dng{background:linear-gradient(180deg,#d9606c,#c23b4b);border-color:#a83442;color:#fff}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:12px;border-radius:999px;padding:5px 12px;border:1px solid var(--line2)}
+  .stat .d{width:8px;height:8px;border-radius:50%}
+  .ok{color:#8de2b2}.ok .d{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .err{color:#f09199}.err .d{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .warn{color:#f6c96e}.warn .d{background:var(--yel);box-shadow:0 0 8px var(--yel)}
+  .log{background:#1c1f22;border:1px solid #0e1012;border-radius:6px;font-family:var(--mono);font-size:12px;
+    padding:10px 12px;height:170px;overflow-y:auto;line-height:1.75;color:#a8b0ba}
+  .log .t{color:#5c6670}
+  .log .g{color:#8de2b2}
+  .log .e{color:#f09199}
+  .log .b{color:#f6c96e}
+
+  /* 通道条 */
+  .ch{display:grid;grid-template-columns:120px 1fr 90px;gap:12px;align-items:center;padding:5px 0}
+  .ch .n{font-size:12.5px;color:#cdd3da}
+  .ch .n small{color:var(--dim);margin-left:6px;font-size:11px}
+  .ch .v{font-family:var(--mono);font-size:12.5px;text-align:right;color:#9ad7ff}
+  .track{position:relative;height:18px;background:#1c1f22;border-radius:5px;border:1px solid #0e1012;overflow:hidden}
+  .track .fill{position:absolute;left:50%;top:0;bottom:0;background:linear-gradient(180deg,#4ab0e8,#2f93c9);
+    border-radius:3px;transition:width .06s linear}
+  .track .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#58606a}
+  .track .lab{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10.5px;color:#eaf6ff}
+
+  /* 仪表 */
+  .gaugeWrap{display:flex;gap:16px;flex-wrap:wrap}
+  .gauge{position:relative;width:150px;height:120px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding-top:6px}
+  .gauge svg{width:100%;height:92px}
+  .gauge .gl{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:var(--sub)}
+  .gauge .gv{position:absolute;top:44px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:15px;color:#fff}
+
+  /* 数字遥测 */
+  .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .cell{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+  .cell .k{font-size:11px;color:var(--sub);margin-bottom:5px}
+  .cell .vv{font-family:var(--mono);font-size:18px;color:#eaf2fa}
+  .cell .vv .u{font-size:11px;color:var(--dim);margin-left:2px}
+  .cell.alert .vv{color:var(--red)}
+
+  /* GPS / 表格 */
+  .gp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .gp .it{font-size:12px;color:var(--sub)}
+  .gp .it b{display:block;font-family:var(--mono);font-size:15px;color:#eaf2fa;margin-top:3px;font-weight:500}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{background:#2c3136;color:var(--sub);text-align:left;padding:8px 10px;font-weight:600;border-bottom:1px solid var(--line2)}
+  td{padding:7px 10px;border-bottom:1px solid #262a2e;color:#d3d9df}
+  td input,td select{width:100%;padding:5px 8px;font-size:12px}
+  .swt{position:relative;width:34px;height:18px;background:#1c1f22;border-radius:9px;border:1px solid var(--line2);cursor:pointer;transition:all .15s}
+  .swt::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#7c8792;transition:all .15s}
+  .swt.on{background:#2f93c966;border-color:#2f93c9}
+  .swt.on::after{left:18px;background:var(--acc)}
+
+  /* 摇杆模拟 */
+  .stickbox{display:flex;gap:18px}
+  .stick{position:relative;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2c3136,#1c1f22);
+    border:1px solid var(--line2);box-shadow:inset 0 4px 14px rgba(0,0,0,.5)}
+  .stick .knob{position:absolute;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a515a,#2a2e33);
+    border:1px solid #5a626c;box-shadow:0 4px 10px rgba(0,0,0,.45);transition:transform .08s linear}
+  .stick .ax{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.07)}
+  .stick .ay{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.07)}
+
+  /* 固件页 */
+  .fwbar{height:20px;background:#1c1f22;border-radius:5px;border:1px solid #0e1012;overflow:hidden}
+  .fwbar .fill{height:100%;width:0%;background:linear-gradient(90deg,#4ab0e8,#35d0a0);transition:width .2s}
+  .fwbar .fill.done{background:linear-gradient(90deg,#27ae60,#35d0a0)}
+
+  /* 关于页 */
+  .abt{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+  .abt .logo{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#3daee9,#7fb4ff 55%,#35d0a0);
+    display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;font-weight:700;box-shadow:0 8px 24px rgba(61,174,233,.3)}
+  .abt h3{font-size:18px}
+  .abt p{font-size:12px;color:var(--sub)}
+  .diag{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px}
+  .diag .d{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:9px 12px;display:flex;justify-content:space-between}
+  .diag .d b{font-family:var(--mono);color:#eaf2fa;font-weight:500}
+
+  /* 掌机模式（竖屏） */
+  #win.portrait{width:430px}
+  #win.portrait #body{flex-direction:column}
+  #win.portrait #nav{width:auto;height:52px;flex-direction:row;border-right:none;border-bottom:1px solid #1e2124;
+    padding:0 6px;align-items:center;overflow-x:auto;gap:2px}
+  #win.portrait #nav .g{display:none}
+  #win.portrait #nav .foot{display:none}
+  #win.portrait .navit{padding:8px 10px;white-space:nowrap}
+  #win.portrait .navit .lbl{display:none}
+  #win.portrait .navit .ico{font-size:16px}
+  #win.portrait #content{padding:12px}
+  #win.portrait .statgrid{grid-template-columns:repeat(2,1fr)}
+  #win.portrait .gp{grid-template-columns:repeat(2,1fr)}
+  #win.portrait .gaugeWrap{justify-content:center}
+  #win.portrait .stickbox{justify-content:center}
+
+  /* 顶部工具条（切换布局） */
+  #tools{position:fixed;top:14px;right:16px;display:flex;gap:8px;z-index:50}
+  #tools .b{background:rgba(42,45,48,.9);border:1px solid #3d434a;color:#c4ccd4;padding:7px 14px;border-radius:999px;
+    font-size:12px;cursor:pointer;backdrop-filter:blur(6px)}
+  #tools .b:hover{color:#fff;border-color:#58606a}
+  #tools .b.on{background:#3daee933;border-color:#3daee9;color:#7fc9f7}
+</style>
+</head>
+<body>
+
+<div id="tools">
+  <button class="b on" id="tDesktop">🖥 桌面横屏</button>
+  <button class="b" id="tPocket">📱 掌机竖屏</button>
+</div>
+
+<div id="win">
+  <!-- 标题栏 -->
+  <div id="bar">
+    <div class="ttl"><span class="ic"></span>ELRS 遥控控制台</div>
+    <div class="st">Qt Quick · QML · ELRS CRSF 串口控制</div>
+    <div class="wbtn"><span>─</span><span>□</span><span class="x">✕</span></div>
+  </div>
+  <div id="body">
+    <!-- 导航 -->
+    <div id="nav">
+      <div class="g">主菜单</div>
+      <div class="navit on" data-p="conn"><span class="ico">🔌</span><span class="lbl">连接</span></div>
+      <div class="navit" data-p="rc"><span class="ico">🕹️</span><span class="lbl">遥控</span></div>
+      <div class="navit" data-p="tele"><span class="ico">📡</span><span class="lbl">遥测</span></div>
+      <div class="navit" data-p="map"><span class="ico">🧭</span><span class="lbl">通道映射</span></div>
+      <div class="navit" data-p="fw"><span class="ico">⬆️</span><span class="lbl">固件升级</span></div>
+      <div class="navit" data-p="about"><span class="ico">ℹ️</span><span class="lbl">关于</span></div>
+      <div class="foot">
+        <span><span class="dot" id="footDot" style="background:var(--red)"></span><span id="footTxt">未连接</span></span>
+        <span>CRSF v2.1.0</span>
+      </div>
+    </div>
+
+    <!-- 内容区 -->
+    <div id="content">
+
+      <!-- ===== 连接页 ===== -->
+      <div class="pg on" id="pg-conn">
+        <h2>串口连接</h2>
+        <div class="sub">连接 ELRS 模组（CRSF 协议），支持自动扫描与上次配置记忆</div>
+        <div class="card">
+          <h4>连接参数</h4>
+          <div class="row">
+            <div class="fld"><div class="lbl">串口设备</div>
+              <select id="selDev">
+                <option>/dev/ttyS1 — RK3566 UART</option>
+                <option>/dev/ttyUSB0 — USB-TTL</option>
+                <option>/dev/ttyUSB1 — USB-TTL</option>
+                <option>COM5 — Windows</option>
+              </select>
+            </div>
+            <div class="fld"><div class="lbl">波特率</div>
+              <select id="selBaud">
+                <option>420000（ELRS 推荐）</option>
+                <option>115200</option><option>57600</option><option>38400</option>
+              </select>
+            </div>
+            <div class="fld"><div class="lbl">流控</div>
+              <select><option>无</option><option>软件 XON/XOFF</option><option>硬件 RTS/CTS</option></select>
+            </div>
+            <div class="fld"><div class="lbl">协议</div>
+              <select><option>CRSF v2</option><option>SBUS</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn" id="btnScan">⟳ 重新扫描</button>
+            <button class="btn pri" id="btnConn">连接</button>
+            <span class="stat warn" id="connStat"><span class="d"></span><span id="connStatTxt">未连接</span></span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>连接日志</h4>
+          <div class="log" id="connLog"></div>
+        </div>
+      </div>
+
+      <!-- ===== 遥控页 ===== -->
+      <div class="pg" id="pg-rc">
+        <h2>遥控 · 通道监视</h2>
+        <div class="sub">16 路通道实时显示 · 60Hz 合并刷新 · 输出 250Hz</div>
+        <div class="card" style="padding-top:8px" id="chWrap"></div>
+        <div class="card">
+          <h4>开关状态</h4>
+          <div style="display:flex;gap:22px;flex-wrap:wrap" id="swWrap"></div>
+        </div>
+        <div class="card">
+          <h4>摇杆输入（模拟）</h4>
+          <div class="stickbox">
+            <div class="stick" id="stL"><div class="ax"></div><div class="ay"></div><div class="knob"></div></div>
+            <div class="stick" id="stR"><div class="ax"></div><div class="ay"></div><div class="knob"></div></div>
+          </div>
+          <div style="margin-top:12px"><button class="btn sm">🎯 摇杆校准向导</button> <span style="font-size:12px;color:var(--dim);margin-left:8px">读取 min / mid / max 并写入配置</span></div>
+        </div>
+      </div>
+
+      <!-- ===== 遥测页 ===== -->
+      <div class="pg" id="pg-tele">
+        <h2>遥测 · Telemetry</h2>
+        <div class="sub">来自接收机回传 · 2Hz 刷新 · 低电压红色告警</div>
+        <div class="gaugeWrap" style="margin-bottom:14px">
+          <div class="gauge" id="gRSSI"><svg viewBox="0 0 150 92"></svg><div class="gv">-85 dBm</div><div class="gl">RSSI 信号强度</div></div>
+          <div class="gauge" id="gLQ"><svg viewBox="0 0 150 92"></svg><div class="gv">85%</div><div class="gl">LQ 链路质量</div></div>
+        </div>
+        <div class="card">
+          <h4>电源 / 链路</h4>
+          <div class="statgrid">
+            <div class="cell"><div class="k">接收机电压</div><div class="vv" id="tVbat">4.85<span class="u">V</span></div></div>
+            <div class="cell"><div class="k">电流</div><div class="vv" id="tCur">0.86<span class="u">A</span></div></div>
+            <div class="cell"><div class="k">已消耗</div><div class="vv" id="tMah">342<span class="u">mAh</span></div></div>
+            <div class="cell"><div class="k">SNR</div><div class="vv" id="tSnr">8.2<span class="u">dB</span></div></div>
+            <div class="cell"><div class="k">发射功率</div><div class="vv" id="tTx">250<span class="u">mW</span></div></div>
+            <div class="cell"><div class="k">包率</div><div class="vv" id="tRate">250<span class="u">Hz</span></div></div>
+            <div class="cell"><div class="k">误帧率</div><div class="vv" id="tFer">0.3<span class="u">%</span></div></div>
+            <div class="cell"><div class="k">飞行模式</div><div class="vv" id="tMode" style="font-size:15px">ACRO</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h4>GPS 定位</h4>
+          <div class="gp">
+            <div class="it">纬度<b id="gLat">39.9042° N</b></div>
+            <div class="it">经度<b id="gLon">116.4074° E</b></div>
+            <div class="it">卫星<b id="gSat">8 颗</b></div>
+            <div class="it">HDOP<b id="gHdop">1.2</b></div>
+            <div class="it">地面速度<b id="gSpd">0.0 m/s</b></div>
+            <div class="it">高度<b id="gAlt">52 m</b></div>
+            <div class="it">航向<b id="gCrs">135°</b></div>
+            <div class="it">定位状态<b id="gFix">3D-FIX</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 通道映射页 ===== -->
+      <div class="pg" id="pg-map">
+        <h2>通道映射</h2>
+        <div class="sub">物理输入 → CRSF 通道 · 反向 / 死区 / 范围 · 保存后热生效</div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table id="mapTbl">
+            <tr><th style="width:150px">物理输入</th><th style="width:120px">CRSF 通道</th><th style="width:90px">反向</th><th style="width:110px">死区 µs</th><th>范围 µs</th></tr>
+          </table>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn pri">💾 保存配置</button>
+          <button class="btn">↺ 恢复默认</button>
+          <span style="font-size:12px;color:var(--dim);align-self:center">配置写入 ~/.config/makeitdo/channel_map.json，热生效</span>
+        </div>
+      </div>
+
+      <!-- ===== 固件升级页 ===== -->
+      <div class="pg" id="pg-fw">
+        <h2>固件升级</h2>
+        <div class="sub">集成 esptool · 自动进入下载模式（GPIO BOOT）</div>
+        <div class="card">
+          <h4>固件文件</h4>
+          <div class="row">
+            <div class="fld"><div class="lbl">固件 (.bin / .zip)</div>
+              <input type="text" value="/home/makeitdo/Downloads/elrs-2.4g-tx-3.3.0.zip" readonly>
+            </div>
+            <div style="align-self:flex-end"><button class="btn">📂 浏览…</button></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--sub)">
+            <span>当前版本 <b style="color:#9ad7ff">3.2.1</b></span>
+            <span>目标版本 <b style="color:#9ad7ff">3.3.0</b></span>
+            <span>芯片 <b style="color:#9ad7ff">ESP32-S3</b></span>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn pri" id="btnUpd">⬆ 开始升级</button>
+            <button class="btn" id="btnCancel" disabled>取消</button>
+          </div>
+        </div>
+        <div class="card">
+          <h4>升级进度</h4>
+          <div class="fwbar" style="margin-bottom:10px"><div class="fill" id="fwFill"></div></div>
+          <div style="font-size:12px;color:var(--sub)"><span id="fwPct">0%</span> · <span id="fwPh">等待开始</span></div>
+        </div>
+        <div class="card">
+          <h4>升级日志</h4>
+          <div class="log" id="fwLog" style="height:200px"></div>
+        </div>
+      </div>
+
+      <!-- ===== 关于页 ===== -->
+      <div class="pg" id="pg-about">
+        <div class="abt">
+          <div class="logo">M</div>
+          <div>
+            <h3>MAKEITDO ELRS 遥控控制台</h3>
+            <p>v1.0.0 · Qt Quick (QML) · 基于 CRSF v2 串口协议 · RK3566 / x86 双平台</p>
+          </div>
+        </div>
+        <div class="card">
+          <h4>串口状态诊断</h4>
+          <div class="diag">
+            <div class="d"><span>串口设备</span><b id="dgDev">—</b></div>
+            <div class="d"><span>波特率</span><b>420000</b></div>
+            <div class="d"><span>CRSF 握手</span><b id="dgHand">未握手</b></div>
+            <div class="d"><span>运行时长</span><b id="dgUptime">0s</b></div>
+            <div class="d"><span>收帧 / 发帧</span><b id="dgFrames">0 / 0</b></div>
+            <div class="d"><span>CRC 错误</span><b id="dgCrc">0</b></div>
+            <div class="d"><span>误帧率</span><b>0.3%</b></div>
+            <div class="d"><span>日志级别</span><b>INFO</b></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn">📄 导出诊断日志</button>
+          <button class="btn">🔗 GitHub</button>
+          <button class="btn">ℹ️ 许可协议</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 页面切换 ================= */
+const navs = document.querySelectorAll('.navit');
+navs.forEach(n=>n.addEventListener('click',()=>{
+  navs.forEach(x=>x.classList.remove('on'));
+  n.classList.add('on');
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+n.dataset.p).classList.add('on');
+}));
+
+/* ================= 布局切换 ================= */
+const win = document.getElementById('win');
+const tD = document.getElementById('tDesktop'), tP = document.getElementById('tPocket');
+tD.addEventListener('click',()=>{win.classList.remove('portrait');tD.classList.add('on');tP.classList.remove('on');});
+tP.addEventListener('click',()=>{win.classList.add('portrait');tP.classList.add('on');tD.classList.remove('on');});
+
+/* ================= 连接模拟 ================= */
+let connected = false, connLog, connTimer = null;
+function logLine(el, txt, cls=''){
+  const d = document.createElement('div');
+  const t = new Date().toLocaleTimeString('zh-CN',{hour12:false});
+  d.innerHTML = `<span class="t">[${t}]</span> ${txt}`;
+  d.className = cls;
+  el.appendChild(d); el.scrollTop = el.scrollHeight;
+}
+function connSwitch(on){
+  connected = on;
+  const s = document.getElementById('connStat');
+  const txt = document.getElementById('connStatTxt');
+  const dot = document.getElementById('footDot'), ft = document.getElementById('footTxt');
+  const btn = document.getElementById('btnConn');
+  if(on){
+    s.className='stat ok'; txt.textContent='已连接 · CRSF'; dot.style.background='var(--green)';
+    ft.textContent='已连接 · 250Hz'; btn.textContent='断开'; btn.classList.remove('pri'); btn.classList.add('dng');
+    logLine(connLog,'CRSF 握手成功，进入 250Hz 链路模式','g');
+    logLine(connLog,'收到 Link Statistics 帧（RSSI -85dBm / LQ 85%）','g');
+  }else{
+    s.className='stat warn'; txt.textContent='未连接'; dot.style.background='var(--red)';
+    ft.textContent='未连接'; btn.textContent='连接'; btn.classList.add('pri'); btn.classList.remove('dng');
+    if(connLog){logLine(connLog,'串口已断开，通道安全归零','e');}
+  }
+}
+document.getElementById('btnConn').addEventListener('click',()=>{
+  const s = document.getElementById('connStat');
+  if(!connected){
+    s.className='stat warn'; s.querySelector('.d').style.background='var(--yel)';
+    document.getElementById('connStatTxt').textContent='连接中…';
+    logLine(connLog,'打开串口 /dev/ttyS1 @ 420000 baud …');
+    logLine(connLog,'发送 CRSF 握手帧 (0xEA) …');
+    setTimeout(()=>connSwitch(true), 900);
+  } else connSwitch(false);
+});
+document.getElementById('btnScan').addEventListener('click',()=>{
+  logLine(connLog,'扫描串口：发现 /dev/ttyS1, /dev/ttyUSB0, /dev/ttyUSB1');
+});
+
+/* ================= 通道条 ================= */
+const CH_NAMES = ['油门','偏航','横滚','俯仰','ARM','模式','蜂鸣','GPS救援','微调','电位器1','电位器2','旋钮1','旋钮2','按键1','按键2','自定义'];
+const chWrap = document.getElementById('chWrap');
+const chEls = [];
+CH_NAMES.forEach((n,i)=>{
+  const d = document.createElement('div'); d.className='ch';
+  d.innerHTML = `<div class="n">CH${i+1} <small>${n}</small></div>
+    <div class="track"><div class="zero"></div><div class="fill"></div><div class="lab">1500µs</div></div>
+    <div class="v">1500</div>`;
+  chWrap.appendChild(d);
+  chEls.push({ fill:d.querySelector('.fill'), lab:d.querySelector('.lab'), v:d.querySelector('.v') });
+});
+
+/* ================= 开关状态 ================= */
+const SW_DEF = [['ARM 解锁',false],['模式开关 · ACRO',true],['蜂鸣',false],['GPS 救援',false],['LED 灯带',true],['录像',false]];
+const swWrap = document.getElementById('swWrap');
+const swEls = [];
+SW_DEF.forEach(([name,on])=>{
+  const d = document.createElement('div');
+  d.style.cssText='display:flex;align-items:center;gap:8px;font-size:12.5px;color:#cdd3da';
+  d.innerHTML = `<span class="swt${on?' on':''}"></span><span>${name}</span>`;
+  const sw = d.querySelector('.swt');
+  sw.addEventListener('click',()=>{sw.classList.toggle('on');});
+  swWrap.appendChild(d); swEls.push(sw);
+});
+
+/* ================= 仪表（SVG 半圆 gauge） ================= */
+function drawGauge(svg, val, min, max, color, fmt){
+  const g = svg.querySelector('g') || document.createElementNS('http://www.w3.org/2000/svg','g');
+  svg.innerHTML='';
+  const r=52, cx=75, cy=80, a0=Math.PI, a1=2*Math.PI;
+  const arc=(a,b)=>{const p=[];
+    for(let i=0;i<=24;i++){const t=a+(b-a)*i/24;
+      p.push(`${(cx+Math.cos(t)*r).toFixed(1)},${(cy+Math.sin(t)*r).toFixed(1)}`);}
+    return p.join(' ');};
+  const ns='http://www.w3.org/2000/svg';
+  const pol=(pts,cls)=>{const p=document.createElementNS(ns,'polyline');p.setAttribute('points',pts);
+    p.setAttribute('fill','none');p.setAttribute('stroke',cls);p.setAttribute('stroke-width','9');
+    p.setAttribute('stroke-linecap','round');svg.appendChild(p);};
+  pol(arc(a0,a1),'#1c1f22');
+  const frac=(val-min)/(max-min);
+  pol(arc(a0,a0+Math.PI*Math.max(0.02,Math.min(0.98,frac))), color);
+  /* 刻度 */
+  for(let i=0;i<=4;i++){
+    const t=a0+(a1-a0)*i/4;
+    const x1=cx+Math.cos(t)*44, y1=cy+Math.sin(t)*44, x2=cx+Math.cos(t)*50, y2=cy+Math.sin(t)*50;
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+    l.setAttribute('stroke','#58606a');l.setAttribute('stroke-width','2');svg.appendChild(l);
+  }
+}
+
+/* ================= 数据模拟 ================= */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+let chVals = CH_NAMES.map(()=>1500);
+let tele = { rssi:-85, lq:85, vbat:4.85, cur:0.86, mah:342, snr:8.2, mode:'ACRO', sat:8, hdop:1.2, fer:0.3 };
+
+/* 通道 60Hz 模拟 */
+setInterval(()=>{
+  if(!connected){ chVals = CH_NAMES.map(()=>1500); }
+  else {
+    chVals[0]=clamp(1500+Math.sin(Date.now()/500)*300 + rnd(-12,12),1000,2000); /* 油门缓动 */
+    for(let i=1;i<4;i++) chVals[i]=clamp(1500+Math.sin(Date.now()/300+i)*150+rnd(-8,8),1000,2000);
+    for(let i=5;i<16;i++) chVals[i]=chVals[i]+rnd(-2,2);
+    chVals[6]=1000; chVals[7]=1000;
+    chVals[4]=swEls[0].classList.contains('on')?2000:1000;
+  }
+  chEls.forEach((e,i)=>{
+    const v=chVals[i], p=(v-1000)/10; /* 0~100% */
+    e.fill.style.left = (50 - p/2)+'%';
+    e.fill.style.width = p+'%';
+    e.v.textContent=Math.round(v);
+    e.lab.textContent=Math.round(v)+'µs';
+  });
+  /* 摇杆 */
+  const sx = Math.sin(Date.now()/400)*34, sy=Math.cos(Date.now()/520)*34;
+  document.querySelector('#stL .knob').style.transform=`translate(${sx}px,${sy}px)`;
+  const rx = Math.sin(Date.now()/360+1)*30, ry=Math.cos(Date.now()/440+1)*30;
+  document.querySelector('#stR .knob').style.transform=`translate(${rx}px,${ry}px)`;
+},16);
+
+/* 遥测 2Hz 模拟 */
+setInterval(()=>{
+  if(connected){
+    tele.rssi=clamp(tele.rssi+rnd(-1.5,1.5),-105,-40);
+    tele.lq=clamp(tele.lq+rnd(-1.5,1.5),55,100);
+    tele.vbat=clamp(tele.vbat+rnd(-0.01,0.01),4.2,5.0);
+    tele.cur=rnd(0.4,1.4); tele.mah+=tele.cur*0.5;
+    tele.snr=clamp(tele.snr+rnd(-0.3,0.3),0,15);
+    tele.fer=rnd(0.1,0.8); tele.sat=7+Math.floor(Math.random()*3);
+    tele.hdop=clamp(tele.hdop+rnd(-0.1,0.1),0.8,2.5);
+  }
+  const rssiEl=document.getElementById('gRSSI').querySelector('.gv'),
+        lqEl=document.getElementById('gLQ').querySelector('.gv');
+  drawGauge(document.querySelector('#gRSSI svg'), tele.rssi, -120, 0, tele.rssi>-70?'#35d0a0':(tele.rssi>-95?'#fdbc4b':'#da4453'));
+  drawGauge(document.querySelector('#gLQ svg'), tele.lq, 0, 100, tele.lq>70?'#3daee9':(tele.lq>40?'#fdbc4b':'#da4453'));
+  rssiEl.textContent=tele.rssi.toFixed(0)+' dBm';
+  lqEl.textContent=tele.lq.toFixed(0)+'%';
+
+  const vbat=document.getElementById('tVbat');
+  vbat.innerHTML=tele.vbat.toFixed(2)+'<span class="u">V</span>';
+  vbat.parentElement.classList.toggle('alert', tele.vbat<4.5);
+  document.getElementById('tCur').innerHTML=tele.cur.toFixed(2)+'<span class="u">A</span>';
+  document.getElementById('tMah').innerHTML=tele.mah.toFixed(0)+'<span class="u">mAh</span>';
+  document.getElementById('tSnr').innerHTML=tele.snr.toFixed(1)+'<span class="u">dB</span>';
+  document.getElementById('tTx').innerHTML='250<span class="u">mW</span>';
+  document.getElementById('tRate').innerHTML='250<span class="u">Hz</span>';
+  document.getElementById('tFer').innerHTML=tele.fer.toFixed(1)+'<span class="u">%</span>';
+  document.getElementById('tMode').textContent=tele.mode;
+  document.getElementById('gLat').textContent=(39.9+rnd(-0.01,0.01)).toFixed(4)+'° N';
+  document.getElementById('gLon').textContent=(116.4+rnd(-0.01,0.01)).toFixed(4)+'° E';
+  document.getElementById('gSat').textContent=tele.sat+' 颗';
+  document.getElementById('gHdop').textContent=tele.hdop.toFixed(1);
+  document.getElementById('gSpd').textContent=rnd(0,2.5).toFixed(1)+' m/s';
+  document.getElementById('gAlt').textContent=(50+rnd(-3,3)).toFixed(0)+' m';
+  document.getElementById('gCrs').textContent=(130+rnd(-8,8)).toFixed(0)+'°';
+  document.getElementById('gFix').textContent='3D-FIX';
+},500);
+
+/* ================= 通道映射表 ================= */
+const MAP = [
+  ['摇杆 L · X（左右）','CH1 油门','','1000–2000'],
+  ['摇杆 L · Y（上下）','CH2 偏航','','1000–2000'],
+  ['摇杆 R · X（左右）','CH3 横滚','','1000–2000'],
+  ['摇杆 R · Y（上下）','CH4 俯仰','','1000–2000'],
+  ['开关 SW_A（两段）','CH5 ARM','1','1000–2000'],
+  ['开关 SW_B（三段）','CH6 模式','1','1000–2000'],
+  ['拨盘 VR1','CH7 微调','','1000–2000'],
+  ['拨盘 VR2','CH8 电位器','','1000–2000'],
+  ['按键 BTN1','CH9 蜂鸣','1','1000–2000'],
+  ['未分配','CH10…CH16','','1000–2000'],
+];
+const mapTbl = document.getElementById('mapTbl');
+MAP.forEach(([inp,ch,rev])=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${inp}</td><td><select>
+      ${['CH1','CH2','CH3','CH4','CH5','CH6','CH7','CH8','CH9','CH10','CH11','CH12','CH13','CH14','CH15','CH16','— 禁用']
+        .map((c,i)=>`<option ${ch===('CH'+(i+1))?'selected':''}>${c}</option>`).join('')}
+    </select></td>
+    <td><span class="swt ${rev?'on':''}" onclick="this.classList.toggle('on')"></span></td>
+    <td><input type="text" value="8"></td>
+    <td><input type="text" value="${ch==='未分配'?'—':MAP[0][3]}"></td>`;
+  mapTbl.appendChild(tr);
+});
+
+/* ================= 固件升级 ================= */
+let fwState=0;
+const fwFill=document.getElementById('fwFill'), fwPct=document.getElementById('fwPct'), fwPh=document.getElementById('fwPh');
+const fwLog=document.getElementById('fwLog');
+const btnUpd=document.getElementById('btnUpd'), btnCancel=document.getElementById('btnCancel');
+const fwSteps=[
+  ['关闭串口并释放',()=>logLine(fwLog,'关闭串口 /dev/ttyS1 …','b')],
+  ['拉低 BOOT (GPIO8) 进入下载模式',()=>logLine(fwLog,'gpioset 0 8=0 · 复位芯片 (GPIO9)','b')],
+  ['擦除 Flash (esptool)',()=>logLine(fwLog,'esptool.py --chip esp32s3 erase_flash …')],
+  ['写入固件 4.2 MB',()=>logLine(fwLog,'Writing at 0x00010000 … 100%','g')],
+  ['校验 + 复位运行',()=>logLine(fwLog,'Hash of data verified ✓  · 重启模组','g')],
+];
+function fwTick(){
+  if(fwState>=100){ fwFill.classList.add('done'); fwPct.textContent='100%'; fwPh.textContent='升级完成，等待重启'; logLine(fwLog,'升级成功，串口重连中…','g'); btnUpd.disabled=false; btnCancel.disabled=true; return; }
+  fwState=Math.min(100, fwState+2);
+  fwFill.style.width=fwState+'%';
+  fwPct.textContent=fwState+'%';
+  const idx=Math.floor(fwState/ (100/fwSteps.length));
+  const st=fwSteps[Math.min(idx,fwSteps.length-1)];
+  fwPh.textContent=st[0];
+  if(fwState%16===0) st[1]();
+  setTimeout(fwTick, 140);
+}
+btnUpd.addEventListener('click',()=>{
+  fwState=0; fwFill.classList.remove('done'); fwFill.style.width='0%';
+  btnUpd.disabled=true; btnCancel.disabled=false;
+  logLine(fwLog,'=== 开始固件升级 v3.2.1 → v3.3.0 ===','b');
+  fwTick();
+});
+btnCancel.addEventListener('click',()=>{ fwState=100; fwFill.style.width='100%'; fwPh.textContent='已取消'; logLine(fwLog,'用户取消升级','e'); });
+
+/* ================= 初始化 ================= */
+connLog = document.getElementById('connLog');
+logLine(connLog,'MAKEITDO ELRS Console v1.0.0 启动');
+logLine(connLog,'自动扫描串口 … 发现 /dev/ttyS1');
+drawGauge(document.querySelector('#gRSSI svg'), tele.rssi, -120, 0, '#35d0a0');
+drawGauge(document.querySelector('#gLQ svg'), tele.lq, 0, 100, '#3daee9');
+
+/* 关于页动态 */
+setInterval(()=>{
+  const t=document.getElementById('dgUptime');
+  const s=parseInt(t.textContent.replace(/\D/g,''))||0;
+  t.textContent=(s+1)+'s';
+  document.getElementById('dgFrames').textContent=(connected?'0':'0')+' / '+(connected? '6250':'0');
+  document.getElementById('dgCrc').textContent=connected?'0':'0';
+  document.getElementById('dgDev').textContent=connected?'/dev/ttyS1':'—';
+  document.getElementById('dgHand').textContent=connected?'已握手 ✓':'未握手';
+},1000);
+</script>
+</body>
+</html>
