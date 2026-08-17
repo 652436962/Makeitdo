@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAKEITDO 遥控器 · 屏幕主界面效果图</title>
+<title>MAKEITDO 遥控器 · 屏幕主界面效果图（整合 ELRS 控制台）</title>
 <style>
   :root{
     --bg:#101214; --panel:#232629; --panel2:#2a2d30; --panel3:#31363b;
     --line:#3d434a; --line2:#4a525c;
     --txt:#eff0f1; --sub:#8a929c; --dim:#646d78;
     --acc:#3daee9; --acc2:#2980b9; --green:#27ae60; --red:#da4453; --yel:#fdbc4b;
-    --a:#e74c3c; --b:#3daee9; --x:#27ae60; --y:#fdbc4b;
     --mono:'Consolas','JetBrains Mono','Courier New',monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -18,7 +17,6 @@
     font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:var(--txt);
     display:flex;align-items:center;justify-content:center;padding:30px 18px}
 
-  /* ===== 顶部说明 ===== */
   .pagehead{position:fixed;top:0;left:0;right:0;padding:10px 18px;display:flex;align-items:center;gap:14px;
     background:linear-gradient(180deg,#1a1d20ee,#15171900);z-index:20}
   .pagehead .t{font-size:14px;font-weight:600;letter-spacing:.5px}
@@ -28,32 +26,30 @@
   .chip{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:#23262999}
   .chip b{color:#aeb6bf;font-weight:600}
 
-  /* ===== 遥控器机身示意 ===== */
+  /* 遥控器机身示意 */
   #device{position:relative;background:linear-gradient(160deg,#2e3134,#24272a 55%,#202326);
     border-radius:26px;padding:22px 24px 30px;box-shadow:0 40px 90px rgba(0,0,0,.65), inset 0 1px 0 #454a4f88;
     border:1px solid #16181a}
   #device::before{content:'';position:absolute;inset:0;border-radius:26px;pointer-events:none;
     background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 3px)}
-  #devLabel{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:9.5px;letter-spacing:3px;
-    color:#565d66;font-weight:600}
+  #devLabel{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:9.5px;letter-spacing:3px;color:#565d66;font-weight:600}
   #devLabel i{font-style:normal;color:#3daee966}
 
-  /* ===== 屏幕玻璃 ===== */
+  /* 屏幕玻璃 */
   #glass{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px #0a0b0c, 0 0 0 6px #17191b,
     0 18px 45px rgba(0,0,0,.6);background:#000}
-  #glass::before{content:'';position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:14px;
+  #glass::before{content:'';position:absolute;inset:0;z-index:80;pointer-events:none;border-radius:14px;
     background:linear-gradient(115deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.03) 22%,transparent 38%,transparent 70%,rgba(255,255,255,.04) 100%)}
-  #glass::after{content:'';position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:14px;
+  #glass::after{content:'';position:absolute;inset:0;z-index:80;pointer-events:none;border-radius:14px;
     box-shadow:inset 0 2px 14px rgba(255,255,255,.05), inset 0 -30px 60px rgba(0,0,0,.45)}
 
   /* 屏幕内容 16:9 模拟 1920×1080 */
-  #screen{position:relative;width:1120px;height:630px;background:#000;overflow:hidden;
-    font-size:15px}
+  #screen{position:relative;width:1120px;height:630px;background:#000;overflow:hidden;font-size:15px}
   @media(max-width:1240px){ #screen{width:900px;height:506.25px;font-size:12px} }
   @media(max-width:960px){ #screen{width:680px;height:382.5px;font-size:9px} }
   @media(max-width:740px){ #screen{width:480px;height:270px;font-size:6.5px} }
 
-  /* ===== 状态栏 ===== */
+  /* 状态栏 */
   #statusbar{position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:center;gap:14px;
     padding:0 22px;background:linear-gradient(180deg,#14171aee,#14171a88 70%,transparent);z-index:10;
     border-bottom:1px solid #ffffff0d}
@@ -68,25 +64,24 @@
   #statusbar .sitem{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#c3cbd4;padding:4px 8px;
     border:1px solid #3a404799;border-radius:7px;background:#1d202388}
   #statusbar .sitem .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-  #statusbar .sitem .dot.warn{background:var(--yel);box-shadow:0 0 6px var(--yel)}
   #statusbar .sitem b{font-family:var(--mono);font-size:12px;color:#fff}
   #statusbar .bt{display:flex;align-items:center;gap:3px}
   #statusbar .bt i{width:3px;border-radius:1px;background:#aeb6bf;display:block}
   #statusbar .bt i:nth-child(1){height:5px}#statusbar .bt i:nth-child(2){height:8px}
   #statusbar .bt i:nth-child(3){height:11px}#statusbar .bt i:nth-child(4){height:14px;background:var(--green)}
 
-  /* ===== 主界面 (Home) ===== */
-  .view{position:absolute;inset:0;padding:64px 26px 22px;overflow:hidden;animation:fade .3s ease}
+  /* 视图 */
+  .view{position:absolute;inset:0;padding:58px 24px 42px;overflow:hidden;animation:fade .3s ease;display:flex;flex-direction:column;gap:10px}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .hidden{display:none !important}
 
+  /* ===== 主界面 Home ===== */
   #home{display:flex;flex-direction:column;gap:14px}
   #home .hello{display:flex;align-items:baseline;gap:10px}
   #home .hello h1{font-size:24px;font-weight:700;letter-spacing:.5px}
   #home .hello .tag{font-size:11px;color:var(--acc);border:1px solid #3daee955;background:#3daee91a;
     border-radius:999px;padding:2px 10px;font-weight:600}
   #home .hello .hint{font-size:11px;color:var(--dim);margin-left:auto;font-family:var(--mono)}
-
   .mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;flex:1;min-height:0}
   .mcard{position:relative;border-radius:14px;border:1px solid var(--line);background:linear-gradient(165deg,var(--panel2),var(--panel));
     padding:16px 16px 14px;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;overflow:hidden;display:flex;flex-direction:column}
@@ -105,8 +100,6 @@
   .mcard .foot .enter{font-size:11px;color:var(--acc);font-family:var(--mono);letter-spacing:1px}
   .mcard .foot .mini{font-family:var(--mono);font-size:12px;color:#dfe5ec}
   .mcard .foot .mini small{color:var(--dim);font-size:10px}
-
-  /* 底部快捷条 (Home) */
   #home .dock{display:flex;gap:10px;align-items:center;justify-content:center;padding:8px 0 2px}
   #home .dock .app{width:44px;height:44px;border-radius:11px;background:var(--panel3);border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;font-size:18px;color:#c3cbd4;cursor:pointer;transition:all .12s}
@@ -123,136 +116,228 @@
   #keytips .k.ab b{background:#3daee933;border-color:#3daee977;color:#9ad7ff}
   #keytips .k.lr b{background:#27ae6026;border-color:#27ae6066;color:#8de2b2}
 
-  /* ===== 遥控模式 ===== */
-  #rc{display:flex;flex-direction:column;gap:12px}
-  #rc .head{display:flex;align-items:center;gap:10px}
-  #rc .head .back{width:34px;height:34px;border-radius:9px;background:var(--panel3);border:1px solid var(--line);
+  /* ===== 通用小控件（控制台） ===== */
+  .card{background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .card h4{font-size:10px;color:var(--sub);letter-spacing:1px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+  .card h4::before{content:'';width:3px;height:10px;border-radius:2px;background:var(--acc)}
+  .btn{display:inline-flex;align-items:center;gap:5px;background:#2a2d30;border:1px solid var(--line2);
+    color:#dfe3e7;border-radius:7px;padding:6px 13px;font-size:11.5px;cursor:pointer;transition:all .12s}
+  .btn:hover{background:#3a4047;border-color:#58606a}
+  .btn.pri{background:linear-gradient(180deg,#4ab0e8,#2f93c9);border-color:#2680b5;color:#fff;font-weight:600}
+  .btn.dng{background:linear-gradient(180deg,#d9606c,#c23b4b);border-color:#a83442;color:#fff}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .lbl{font-size:9.5px;color:var(--sub);margin-bottom:3px}
+  select,input[type=text]{width:100%;background:#2a2d30;border:1px solid var(--line2);color:var(--txt);
+    border-radius:6px;padding:5px 8px;font-size:11px;outline:none}
+  select:focus{border-color:var(--acc)}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:4px 10px;border:1px solid var(--line2)}
+  .stat .d{width:8px;height:8px;border-radius:50%}
+  .ok{color:#8de2b2}.ok .d{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .err{color:#f09199}.err .d{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .warn{color:#f6c96e}.warn .d{background:var(--yel);box-shadow:0 0 8px var(--yel)}
+  .log{background:#1c1f22;border:1px solid #0e1012;border-radius:6px;font-family:var(--mono);font-size:10.5px;
+    padding:7px 10px;height:100%;overflow-y:auto;line-height:1.7;color:#a8b0ba}
+  .log .t{color:#5c6670}
+  .log .g{color:#8de2b2}
+  .log .e{color:#f09199}
+  .log .b{color:#f6c96e}
+  .swt{position:relative;width:26px;height:15px;background:#1c1f22;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:all .15s;flex:none}
+  .swt::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#7c8792;transition:all .15s}
+  .swt.on{background:#2f93c966;border-color:#2f93c9}
+  .swt.on::after{left:14px;background:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{background:#2c3136;color:var(--sub);text-align:left;padding:5px 8px;font-weight:600;border-bottom:1px solid var(--line2)}
+  td{padding:4px 8px;border-bottom:1px solid #262a2e;color:#d3d9df}
+  td select{width:100%;padding:3px 6px;font-size:10.5px}
+  td input[type=text]{width:100%;padding:3px 6px;font-size:10.5px}
+  .fwbar{height:14px;background:#1c1f22;border-radius:5px;border:1px solid #0e1012;overflow:hidden}
+  .fwbar .fill{height:100%;width:0%;background:linear-gradient(90deg,#4ab0e8,#35d0a0);transition:width .2s}
+  .fwbar .fill.done{background:linear-gradient(90deg,#27ae60,#35d0a0)}
+
+  /* ===== 遥控模式（控制台） ===== */
+  #rc .head{display:flex;align-items:center;gap:10px;flex:none}
+  .back{width:32px;height:32px;border-radius:9px;background:var(--panel3);border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#c3cbd4}
-  #rc .head .back:hover{border-color:var(--acc);color:var(--acc)}
-  #rc .head h2{font-size:18px}
-  #rc .head .model{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:7px;padding:4px 10px;background:#1d2023}
+  .back:hover{border-color:var(--acc);color:var(--acc)}
+  #rc .head h2{font-size:17px}
+  #rc .head .model{font-size:10.5px;color:var(--sub);border:1px solid var(--line);border-radius:7px;padding:3px 9px;background:#1d2023}
   #rc .head .model b{color:#fff;font-family:var(--mono)}
   #rc .head .sp{flex:1}
-  #rc .head .elrs{display:flex;align-items:center;gap:8px;font-size:11px;padding:5px 12px;border-radius:999px;
+  #rc .head .elrs{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:4px 11px;border-radius:999px;
     border:1px solid #27ae6055;background:#27ae601a;color:#8de2b2;font-weight:600}
   #rc .head .elrs .d{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.6s infinite}
   @keyframes pulse{50%{opacity:.4}}
+  #rc .head .elrs.off{border-color:var(--line2);background:none;color:var(--sub)}
+  #rc .head .elrs.off .d{background:var(--red);box-shadow:none;animation:none}
 
-  #rc .body{flex:1;display:grid;grid-template-columns:270px 1fr 300px;gap:12px;min-height:0}
+  /* 二级 Tab */
+  .tabs{display:flex;gap:5px;flex:none;border-bottom:1px solid #ffffff0f;padding-bottom:6px}
+  .tab{display:flex;align-items:center;gap:6px;font-size:11px;color:#aeb6bf;padding:6px 13px;border-radius:8px;cursor:pointer;
+    border:1px solid transparent;transition:all .12s}
+  .tab:hover{background:#2c3136;color:#fff}
+  .tab.on{background:#3daee92c;border-color:#3daee966;color:#7fc9f7}
 
-  /* 左：飞行状态 */
-  #rc .colL{display:flex;flex-direction:column;gap:12px;min-height:0}
-  .box{background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
-  .box h4{font-size:11px;color:var(--sub);letter-spacing:1px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
-  .box h4::before{content:'';width:3px;height:11px;border-radius:2px;background:var(--acc)}
-  .swgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-  .sw{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#c3cbd4;
-    border:1px solid #ffffff0e;background:#1a1d20;border-radius:7px;padding:6px 8px}
-  .sw .nm{display:flex;align-items:center;gap:5px}
-  .sw .st{font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:#27ae6022;color:#8de2b2}
-  .sw .st.o{background:#3d434a;color:var(--dim)}
-  .throttle{margin-top:8px}
-  .throttle .tl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:4px}
-  .throttle .bar{height:9px;background:#14171a;border:1px solid #0e1012;border-radius:5px;overflow:hidden}
-  .throttle .bar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--green),var(--yel),var(--red));border-radius:4px;transition:width .12s}
-  .gpsrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
-  .gpsrow .g{font-size:10.5px;color:var(--sub)}
-  .gpsrow .g b{display:block;font-family:var(--mono);font-size:13px;color:#eaf2fa;margin-top:2px;font-weight:500}
+  .subs{flex:1;min-height:0;position:relative}
+  .sub{position:absolute;inset:0;display:none;flex-direction:column;gap:8px;overflow-y:auto;padding-right:2px;
+    scrollbar-width:thin;scrollbar-color:#464d55 transparent}
+  .sub.on{display:flex;animation:fade .2s ease}
+  .sub::-webkit-scrollbar{width:6px}
+  .sub::-webkit-scrollbar-thumb{background:#464d55;border-radius:3px}
 
-  /* 中：姿态 + 遥测 */
-  #rc .colM{display:flex;flex-direction:column;gap:12px;min-height:0}
-  .artifical{position:relative;flex:1;border-radius:11px;overflow:hidden;border:1px solid var(--line);background:#0c0e10}
-  .artifical .sky{position:absolute;inset:0;background:linear-gradient(180deg,#0e2738,#1c4a63 85%,#2a6b8c)}
-  .artifical .gnd{position:absolute;left:0;right:0;top:58%;height:42%;background:linear-gradient(180deg,#241c12,#3a2c1a)}
-  .artifical .horizon{position:absolute;left:0;right:0;top:58%;height:2px;background:#dff1ff;box-shadow:0 0 8px #dff1ff}
-  .artifical .frm{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
-  .artifical .frm .pit{font-family:var(--mono);font-size:26px;text-shadow:0 1px 6px #000c;background:#0009;padding:2px 12px;border-radius:8px}
-  .artifical .frm .rll{font-family:var(--mono);font-size:12px;margin-top:6px;color:#cfe8ff;text-shadow:0 1px 4px #000c}
-  .artifical .frm .tag{position:absolute;top:8px;left:10px;font-size:10px;color:#9fd4ff88;letter-spacing:2px}
-  .artifical .frm .osd{position:absolute;bottom:8px;left:10px;font-family:var(--mono);font-size:10.5px;color:#ffd97a;text-shadow:0 1px 3px #000}
-  .artifical .frm .osd2{position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10.5px;color:#8de2b2;text-shadow:0 1px 3px #000}
-  .artifical .frm .vs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-  .artifical .frm .vs::before,.artifical .frm .vs::after{content:'';position:absolute;background:#ffffff44}
-  .artifical .frm .vs::before{width:1px;height:100%}
-  .artifical .frm .vs::after{height:1px;width:100%}
-  .telmeter{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-  .tm{background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
-  .tm .k{font-size:10px;color:var(--sub);display:flex;align-items:center;gap:5px}
-  .tm .k .ic{width:13px;height:13px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px}
-  .tm .v{font-family:var(--mono);font-size:19px;color:#eaf2fa;margin-top:3px;font-weight:600}
-  .tm .v small{font-size:10px;color:var(--dim);margin-left:2px;font-weight:400}
-  .tm.good .v{color:#8de2b2}.tm.warn .v{color:var(--yel)}.tm.bad .v{color:var(--red)}
+  /* 连接页 */
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .fld{flex:1;min-width:110px}
 
-  /* 右：通道 */
-  #rc .colR{display:flex;flex-direction:column;gap:12px;min-height:0}
-  .chwrap{flex:1;overflow:hidden}
-  .chrow{display:grid;grid-template-columns:30px 1fr 44px;gap:8px;align-items:center;padding:4.5px 0}
-  .chrow .cn{font-family:var(--mono);font-size:10px;color:var(--dim)}
-  .chrow .tk{position:relative;height:12px;background:#14171a;border:1px solid #0e1012;border-radius:4px;overflow:hidden}
+  /* 遥控页 */
+  #sub-rc .rcgrid{display:grid;grid-template-columns:1fr 300px;gap:8px;flex:1;min-height:0}
+  .chrow{display:grid;grid-template-columns:104px 1fr 74px;gap:8px;align-items:center;padding:3px 0}
+  .chrow .cn{font-size:10.5px;color:#cdd3da}
+  .chrow .cn small{color:var(--dim);margin-left:5px;font-size:9.5px}
+  .chrow .tk{position:relative;height:11px;background:#14171a;border:1px solid #0e1012;border-radius:4px;overflow:hidden}
   .chrow .tk .fill{position:absolute;top:0;bottom:0;left:50%;background:linear-gradient(90deg,#2f93c9,#4ab0e8);border-radius:3px}
   .chrow .tk .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#58606a}
   .chrow .cv{font-family:var(--mono);font-size:10px;color:#9ad7ff;text-align:right}
-  .fnkeys{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-  .fn{display:flex;align-items:center;gap:8px;font-size:10.5px;color:#c3cbd4;background:#1a1d20;border:1px solid #ffffff0e;border-radius:7px;padding:7px 9px}
-  .fn .fk{min-width:26px;height:17px;display:flex;align-items:center;justify-content:center;border-radius:5px;
-    background:#23272b;border:1px solid #4a525c;font-family:var(--mono);font-size:9px;color:#dfe5ec}
-  .fn .fk.m{background:#fdbc4b22;border-color:#fdbc4b66;color:#f6c96e}
+  .swwrap{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+  .swi{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#cdd3da}
+  .stickbox{display:flex;gap:14px;justify-content:center;margin-top:8px}
+  .stick{position:relative;width:82px;height:82px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2c3136,#1c1f22);
+    border:1px solid var(--line2);box-shadow:inset 0 4px 10px rgba(0,0,0,.5)}
+  .stick .knob{position:absolute;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a515a,#2a2e33);
+    border:1px solid #5a626c;box-shadow:0 4px 8px rgba(0,0,0,.45);transition:transform .08s linear}
+  .stick .ax{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.07)}
+  .stick .ay{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.07)}
 
-  /* ===== 游戏模式 ===== */
-  #game{display:flex;flex-direction:column;gap:12px}
+  /* 遥测页 */
+  .gaugeWrap{display:flex;gap:12px}
+  .gauge{position:relative;width:110px;height:84px;background:#22262a;border:1px solid var(--line);border-radius:8px;padding-top:2px}
+  .gauge svg{width:100%;height:62px}
+  .gauge .gv{position:absolute;top:36px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:13px;color:#fff}
+  .gauge .gl{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:9px;color:var(--sub)}
+  .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .cell{background:#22262a;border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+  .cell .k{font-size:9.5px;color:var(--sub);margin-bottom:3px}
+  .cell .vv{font-family:var(--mono);font-size:15px;color:#eaf2fa}
+  .cell .vv .u{font-size:9px;color:var(--dim);margin-left:2px}
+  .cell.alert .vv{color:var(--red)}
+  .gp{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .gp .it{font-size:10px;color:var(--sub)}
+  .gp .it b{display:block;font-family:var(--mono);font-size:12px;color:#eaf2fa;margin-top:2px;font-weight:500}
+
+  /* 关于页 */
+  .diag{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px}
+  .diag .d{background:#22262a;border:1px solid var(--line);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between}
+  .diag .d b{font-family:var(--mono);color:#eaf2fa;font-weight:500}
+
+  /* 游戏模式 */
   #game .head{display:flex;align-items:center;gap:10px}
-  #game .head h2{font-size:18px}
-  #game .head .gstat{font-size:11px;color:var(--sub)}
+  #game .head h2{font-size:17px}
+  #game .head .gstat{font-size:10.5px;color:var(--sub)}
   #game .head .sp{flex:1}
-  #game .head .search{display:flex;align-items:center;gap:6px;background:#1a1d20;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--dim)}
-  #game .grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(0,1fr);gap:11px;min-height:0}
+  #game .head .search{display:flex;align-items:center;gap:6px;background:#1a1d20;border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:10.5px;color:var(--dim)}
+  #game .grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(0,1fr);gap:10px;min-height:0}
   .gitem{position:relative;border-radius:11px;border:1px solid var(--line);background:linear-gradient(160deg,#2b2f33,#212427);overflow:hidden;cursor:pointer;transition:all .14s}
   .gitem:hover{transform:translateY(-3px);border-color:#3daee9aa}
-  .gitem .thumb{height:62%;display:flex;align-items:center;justify-content:center;font-size:30px;background:
+  .gitem .thumb{height:64%;display:flex;align-items:center;justify-content:center;font-size:28px;background:
     radial-gradient(circle at 30% 30%,#3daee922,transparent 60%),linear-gradient(160deg,#1c2a35,#16202a)}
-  .gitem .thumb .ct{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:20px;background:#3daee933;border:2px solid #3daee966;color:#9ad7ff}
+  .gitem .thumb .ct{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:18px;background:#3daee933;border:2px solid #3daee966;color:#9ad7ff}
   .gitem .thumb .ct.s{background:#27ae6026;border-color:#27ae6066;color:#8de2b2}
   .gitem .thumb .ct.n{background:#fdbc4b26;border-color:#fdbc4b66;color:#f6c96e}
   .gitem .thumb .ct.p{background:#e74c3c26;border-color:#e74c3c66;color:#f09199}
-  .gitem .meta{position:absolute;left:0;right:0;bottom:0;padding:7px 9px;background:linear-gradient(180deg,transparent,#0d0f11cc)}
-  .gitem .meta b{font-size:11px;display:block}
-  .gitem .meta i{font-style:normal;font-size:9px;color:var(--dim);font-family:var(--mono)}
+  .gitem .meta{position:absolute;left:0;right:0;bottom:0;padding:6px 8px;background:linear-gradient(180deg,transparent,#0d0f11cc)}
+  .gitem .meta b{font-size:10.5px;display:block}
+  .gitem .meta i{font-style:normal;font-size:8.5px;color:var(--dim);font-family:var(--mono)}
   .gitem.sel{border-color:var(--acc);box-shadow:0 0 0 2px #3daee944,0 12px 26px rgba(0,0,0,.4)}
   .gitem.sel .meta b{color:#7fc9f7}
-  #game .foot{display:flex;justify-content:center;gap:14px;font-size:10px;color:var(--dim)}
+  #game .foot{display:flex;justify-content:center;gap:14px;font-size:9.5px;color:var(--dim)}
 
-  /* ===== 系统设置 ===== */
-  #sys{display:flex;flex-direction:column;gap:12px}
+  /* 系统设置 */
   #sys .head{display:flex;align-items:center;gap:10px}
-  #sys .head h2{font-size:18px}
-  #sys .setlist{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden}
-  .setrow{display:flex;align-items:center;gap:12px;background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);
-    border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .12s}
+  #sys .head h2{font-size:17px}
+  #sys .head .sp{flex:1}
+  #sys .head .gstat{font-size:10.5px;color:var(--sub)}
+  .setlist{flex:1;display:flex;flex-direction:column;gap:7px;overflow:hidden}
+  .setrow{display:flex;align-items:center;gap:11px;background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);
+    border-radius:10px;padding:8px 13px;cursor:pointer;transition:border-color .12s}
   .setrow:hover{border-color:#3daee966}
-  .setrow .ic{width:30px;height:30px;border-radius:8px;background:#3daee91a;border:1px solid #3daee944;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .setrow .ic{width:28px;height:28px;border-radius:8px;background:#3daee91a;border:1px solid #3daee944;display:flex;align-items:center;justify-content:center;font-size:13px}
   .setrow .nm{flex:1}
-  .setrow .nm b{font-size:13px;display:block}
-  .setrow .nm small{font-size:10px;color:var(--dim)}
-  .setrow .val{font-family:var(--mono);font-size:11px;color:#9ad7ff}
-  .setrow .arr{color:var(--dim);font-size:13px}
+  .setrow .nm b{font-size:12px;display:block}
+  .setrow .nm small{font-size:9px;color:var(--dim)}
+  .setrow .val{font-family:var(--mono);font-size:10px;color:#9ad7ff}
+  .setrow .arr{color:var(--dim);font-size:12px}
 
-  /* 底部按键提示条通用 */
-  .backbtn{position:absolute;right:14px;bottom:44px;width:30px;height:30px;border-radius:50%;background:#23272b;
-    border:1px solid #4a525c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#c3cbd4;cursor:pointer;z-index:15}
-  .backbtn:hover{border-color:var(--acc);color:var(--acc)}
+  /* ===== 遥控模式 · 飞行界面（原版恢复） ===== */
+  #rcFly{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+  #rcFly .body{flex:1;display:grid;grid-template-columns:270px 1fr 300px;gap:12px;min-height:0}
+  #rcFly .colL{display:flex;flex-direction:column;gap:12px;min-height:0}
+  #rcFly .box{background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  #rcFly .box h4{font-size:11px;color:var(--sub);letter-spacing:1px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+  #rcFly .box h4::before{content:'';width:3px;height:11px;border-radius:2px;background:var(--acc)}
+  #rcFly .swgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  #rcFly .sw{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#c3cbd4;
+    border:1px solid #ffffff0e;background:#1a1d20;border-radius:7px;padding:6px 8px}
+  #rcFly .sw .nm{display:flex;align-items:center;gap:5px}
+  #rcFly .sw .st{font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:#27ae6022;color:#8de2b2}
+  #rcFly .sw .st.o{background:#3d434a;color:var(--dim)}
+  #rcFly .throttle{margin-top:8px}
+  #rcFly .throttle .tl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:4px}
+  #rcFly .throttle .bar{height:9px;background:#14171a;border:1px solid #0e1012;border-radius:5px;overflow:hidden}
+  #rcFly .throttle .bar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--green),var(--yel),var(--red));border-radius:4px;transition:width .12s}
+  #rcFly .gpsrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+  #rcFly .gpsrow .g{font-size:10.5px;color:var(--sub)}
+  #rcFly .gpsrow .g b{display:block;font-family:var(--mono);font-size:13px;color:#eaf2fa;margin-top:2px;font-weight:500}
+  #rcFly .colM{display:flex;flex-direction:column;gap:12px;min-height:0}
+  #rcFly .artifical{position:relative;flex:1;border-radius:11px;overflow:hidden;border:1px solid var(--line);background:#0c0e10}
+  #rcFly .artifical .sky{position:absolute;inset:0;background:linear-gradient(180deg,#0e2738,#1c4a63 85%,#2a6b8c)}
+  #rcFly .artifical .gnd{position:absolute;left:0;right:0;top:58%;height:42%;background:linear-gradient(180deg,#241c12,#3a2c1a)}
+  #rcFly .artifical .horizon{position:absolute;left:0;right:0;top:58%;height:2px;background:#dff1ff;box-shadow:0 0 8px #dff1ff}
+  #rcFly .artifical .frm{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+  #rcFly .artifical .frm .pit{font-family:var(--mono);font-size:26px;text-shadow:0 1px 6px #000c;background:#0009;padding:2px 12px;border-radius:8px}
+  #rcFly .artifical .frm .rll{font-family:var(--mono);font-size:12px;margin-top:6px;color:#cfe8ff;text-shadow:0 1px 4px #000c}
+  #rcFly .artifical .frm .tag{position:absolute;top:8px;left:10px;font-size:10px;color:#9fd4ff88;letter-spacing:2px}
+  #rcFly .artifical .frm .osd{position:absolute;bottom:8px;left:10px;font-family:var(--mono);font-size:10.5px;color:#ffd97a;text-shadow:0 1px 3px #000}
+  #rcFly .artifical .frm .osd2{position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10.5px;color:#8de2b2;text-shadow:0 1px 3px #000}
+  #rcFly .artifical .frm .vs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  #rcFly .artifical .frm .vs::before,#rcFly .artifical .frm .vs::after{content:'';position:absolute;background:#ffffff44}
+  #rcFly .artifical .frm .vs::before{width:1px;height:100%}
+  #rcFly .artifical .frm .vs::after{height:1px;width:100%}
+  #rcFly .telmeter{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  #rcFly .tm{background:linear-gradient(170deg,#25282b,#1e2124);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  #rcFly .tm .k{font-size:10px;color:var(--sub);display:flex;align-items:center;gap:5px}
+  #rcFly .tm .k .ic{width:13px;height:13px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:9px}
+  #rcFly .tm .v{font-family:var(--mono);font-size:19px;color:#eaf2fa;margin-top:3px;font-weight:600}
+  #rcFly .tm .v small{font-size:10px;color:var(--dim);margin-left:2px;font-weight:400}
+  #rcFly .tm.good .v{color:#8de2b2}#rcFly .tm.warn .v{color:var(--yel)}#rcFly .tm.bad .v{color:var(--red)}
+  #rcFly .colR{display:flex;flex-direction:column;gap:12px;min-height:0}
+  #rcFly .chwrap{flex:1;overflow:hidden}
+  #rcFly .chrow{display:grid;grid-template-columns:30px 1fr 44px;gap:8px;align-items:center;padding:4.5px 0}
+  #rcFly .chrow .cn{font-family:var(--mono);font-size:10px;color:var(--dim)}
+  #rcFly .chrow .tk{position:relative;height:12px;background:#14171a;border:1px solid #0e1012;border-radius:4px;overflow:hidden}
+  #rcFly .chrow .tk .fill{position:absolute;top:0;bottom:0;left:50%;background:linear-gradient(90deg,#2f93c9,#4ab0e8);border-radius:3px}
+  #rcFly .chrow .tk .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#58606a}
+  #rcFly .chrow .cv{font-family:var(--mono);font-size:10px;color:#9ad7ff;text-align:right}
+  #rcFly .fnkeys{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  #rcFly .fn{display:flex;align-items:center;gap:8px;font-size:10.5px;color:#c3cbd4;background:#1a1d20;border:1px solid #ffffff0e;border-radius:7px;padding:7px 9px}
+  #rcFly .fn .fk{min-width:26px;height:17px;display:flex;align-items:center;justify-content:center;border-radius:5px;
+    background:#23272b;border:1px solid #4a525c;font-family:var(--mono);font-size:9px;color:#dfe5ec}
+  #rcFly .fn .fk.m{background:#fdbc4b22;border-color:#fdbc4b66;color:#f6c96e}
+
+  /* ELRS 控制台容器（二级视图） */
+  #rcConsole{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+  #rcConsole .flybar{display:flex;align-items:center;gap:8px;flex:none}
+  #rcConsole .flybar .sp{flex:1}
 </style>
 </head>
 <body>
 
 <div class="pagehead">
-  <div class="t">MAKEITDO 遥控器 · 屏幕主界面效果图<small>5.5″ 16:9 横置 · 121.7×68.5mm · 1920×1080</small></div>
+  <div class="t">MAKEITDO 遥控器 · 屏幕主界面效果图<small>整合 ELRS 控制台 · 5.5″ 16:9 · 1920×1080</small></div>
   <div class="sp"></div>
   <div class="chips">
     <span class="chip">SoC <b>RK3566</b></span>
-    <span class="chip">OS <b>Armbian + Wayfire</b></span>
     <span class="chip">链路 <b>ELRS 2.4G</b></span>
-    <span class="chip">UI <b>Qt6 / Ozone</b></span>
+    <span class="chip">控制台 <b>Qt6 / elrs-qt</b></span>
   </div>
 </div>
 
@@ -267,7 +352,7 @@
         <div class="clock" id="clock">12:00:00</div>
         <div class="date" id="date">2026-08-13 周四</div>
         <div class="sp"></div>
-        <div class="sitem"><span class="dot"></span>ELRS <b id="sbRssi">-71dBm</b></div>
+        <div class="sitem"><span class="dot" id="sbDot"></span>ELRS <b id="sbRssi">-71dBm</b></div>
         <div class="sitem">📶 <b>WiFi</b></div>
         <div class="sitem">🔊 <b>70%</b></div>
         <div class="sitem">🔋<span class="bt"><i></i><i></i><i></i><i></i></span><b>87%</b></div>
@@ -278,21 +363,19 @@
         <div class="hello">
           <h1>遥控器主界面</h1>
           <span class="tag">● 系统在线</span>
-          <span class="hint">Ctrl + 单击卡片进入</span>
+          <span class="hint">点击卡片进入对应模式</span>
         </div>
-
         <div class="mcards">
           <div class="mcard" onclick="go('rc')">
             <div class="bg">🎮</div>
-            <div class="top"><div class="ico">🎮</div><span class="stat">● 已连接</span></div>
+            <div class="top"><div class="ico">🎮</div><span class="stat" id="mcConn">● 已连接</span></div>
             <h3>遥控模式</h3>
-            <p>ELRS 2.4G 实时链路 · 16 通道映射 · 姿态/遥测仪表 · 当前机型 <b style="color:#7fc9f7">FPV-Drone</b></p>
+            <p>ELRS 控制台 · 连接 / 通道 / 遥测 / 通道映射 / 固件升级 · 当前机型 <b style="color:#7fc9f7">FPV-Drone</b></p>
             <div class="foot">
               <span class="mini">LQ <small id="hLq">96%</small> · RSSI <small id="hRssi">-71</small></span>
               <span class="enter">ENTER ▶</span>
             </div>
           </div>
-
           <div class="mcard" onclick="go('game')">
             <div class="bg">👾</div>
             <div class="top"><div class="ico g">👾</div><span class="stat">● 就绪</span></div>
@@ -303,23 +386,21 @@
               <span class="enter">ENTER ▶</span>
             </div>
           </div>
-
           <div class="mcard" onclick="go('sys')">
             <div class="bg">⚙️</div>
             <div class="top"><div class="ico y">⚙️</div><span class="stat off">系统</span></div>
             <h3>系统设置</h3>
-            <p>WiFi / 蓝牙 / 背光 · 通道校准 · ELRS 参数 · 固件升级 · 桌面模式 (Wayfire) 切换</p>
+            <p>WiFi / 蓝牙 / 背光 · 通道校准 · ELRS 参数 · 桌面模式 (Wayfire) 切换</p>
             <div class="foot">
               <span class="mini">内核 <small>6.1 LTS</small> · 版本 <small>v1.2.0</small></span>
               <span class="enter">ENTER ▶</span>
             </div>
           </div>
         </div>
-
         <div class="dock">
-          <div class="app on">🏠</div><div class="app">🎮</div><div class="app">📡</div>
+          <div class="app on" onclick="go('home')">🏠</div><div class="app" onclick="go('rc')">🎮</div>
           <div class="sepdot"></div>
-          <div class="app">📻</div><div class="app">🛜</div><div class="app">⚙️</div>
+          <div class="app" onclick="go('game')">👾</div><div class="app" onclick="go('sys')">⚙️</div>
         </div>
       </div>
 
@@ -328,66 +409,257 @@
         <div class="head">
           <div class="back" onclick="go('home')">‹</div>
           <h2>遥控模式</h2>
-          <span class="model">当前机型 <b>FPV-Drone</b> · RX1</span>
+          <span class="model">机型 <b>FPV-Drone</b> · RX1</span>
           <span class="sp"></span>
-          <div class="elrs"><span class="d"></span>ELRS 已连接 · 250Hz</div>
+          <div class="elrs" id="rcElrs"><span class="d"></span>ELRS 已连接 · 250Hz</div>
+          <button class="btn" onclick="toggleConsole(true)">🖥 ELRS 控制台</button>
         </div>
-        <div class="body">
-          <div class="colL">
-            <div class="box">
-              <h4>飞行状态</h4>
-              <div class="swgrid">
-                <div class="sw"><span class="nm">🛡 ARM</span><span class="st">OFF</span></div>
-                <div class="sw"><span class="nm">🔄 模式</span><span class="st" id="swMode">Angle</span></div>
-                <div class="sw"><span class="nm">🔊 蜂鸣</span><span class="st o">静音</span></div>
-                <div class="sw"><span class="nm">🆘 GPS救援</span><span class="st o">—</span></div>
+
+        <!-- 飞行界面（原版） -->
+        <div id="rcFly">
+          <div class="body">
+            <div class="colL">
+              <div class="box">
+                <h4>飞行状态</h4>
+                <div class="swgrid">
+                  <div class="sw"><span class="nm">🛡 ARM</span><span class="st">OFF</span></div>
+                  <div class="sw"><span class="nm">🔄 模式</span><span class="st" id="swMode">Angle</span></div>
+                  <div class="sw"><span class="nm">🔊 蜂鸣</span><span class="st o">静音</span></div>
+                  <div class="sw"><span class="nm">🆘 GPS救援</span><span class="st o">—</span></div>
+                </div>
+                <div class="throttle">
+                  <div class="tl"><span>油门 (CH3)</span><span id="thVal">25%</span></div>
+                  <div class="bar"><i id="thBar"></i></div>
+                </div>
+                <div class="gpsrow">
+                  <div class="g">🛰 卫星<b id="fSat">12</b></div>
+                  <div class="g">📍 距离<b id="fDist">482 m</b></div>
+                </div>
               </div>
-              <div class="throttle">
-                <div class="tl"><span>油门 (CH3)</span><span id="thVal">25%</span></div>
-                <div class="bar"><i id="thBar"></i></div>
+            </div>
+
+            <div class="colM">
+              <div class="artifical">
+                <div class="sky"></div><div class="gnd"></div>
+                <div class="frm">
+                  <div class="tag">FPV 姿态</div>
+                  <div class="vs"></div>
+                  <div class="pit" id="pit">+2.4°</div>
+                  <div class="rll" id="rll">横滚 -1.8° · 航向 243°</div>
+                  <div class="osd">BAT <span id="osdBat">16.2V</span> · <span id="osdTime">8:32</span></div>
+                  <div class="osd2">ALT <span id="osdAlt">58 m</span> · SPD <span id="osdSpd">12.6</span></div>
+                </div>
               </div>
-              <div class="gpsrow">
-                <div class="g">🛰 卫星<b id="gSat">12</b></div>
-                <div class="g">📍 距离<b id="gDist">482 m</b></div>
+              <div class="telmeter">
+                <div class="tm good"><div class="k"><span class="ic" style="background:#27ae6022">📶</span>链路质量 LQ</div><div class="v" id="fLq">96<small>%</small></div></div>
+                <div class="tm" id="tmRssi"><div class="k"><span class="ic" style="background:#3daee922">📡</span>信号 RSSI</div><div class="v" id="fRssi">-71<small>dBm</small></div></div>
+                <div class="tm good"><div class="k"><span class="ic" style="background:#27ae6022">🔋</span>接收机电压</div><div class="v" id="fVbat">16.2<small>V</small></div></div>
+                <div class="tm warn"><div class="k"><span class="ic" style="background:#fdbc4b22">⚡</span>电流</div><div class="v" id="fCur">4.6<small>A</small></div></div>
+              </div>
+            </div>
+
+            <div class="colR">
+              <div class="box chwrap" style="flex:1">
+                <h4>CRSF 通道 (16ch · 60Hz)</h4>
+                <div id="rcChlist"></div>
+              </div>
+              <div class="box" style="flex:none">
+                <h4>快捷键</h4>
+                <div class="fnkeys">
+                  <div class="fn"><span class="fk">L</span>体感瞄准</div>
+                  <div class="fn"><span class="fk">LZ</span>瞬时急停</div>
+                  <div class="fn"><span class="fk">M1</span>模式切换</div>
+                  <div class="fn"><span class="fk m">M4</span>屏幕截图</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ELRS 控制台（整合 qt_ui） -->
+        <div id="rcConsole" class="hidden">
+        <div class="flybar">
+          <span style="font-size:11px;color:var(--sub)">ELRS 控制台 · 连接 / 遥控 / 遥测 / 映射 / 固件 / 关于</span>
+          <span class="sp"></span>
+          <button class="btn" onclick="toggleConsole(false)">🎮 返回飞行界面</button>
+        </div>
+        <div class="tabs">
+          <div class="tab on" data-t="conn">🔌 连接</div>
+          <div class="tab" data-t="rc">🕹️ 遥控</div>
+          <div class="tab" data-t="tele">📡 遥测</div>
+          <div class="tab" data-t="map">🧭 通道映射</div>
+          <div class="tab" data-t="fw">⬆️ 固件升级</div>
+          <div class="tab" data-t="about">ℹ️ 关于</div>
+        </div>
+        <div class="subs">
+
+          <!-- 连接 -->
+          <div class="sub on" id="sub-conn">
+            <div class="card">
+              <h4>连接参数</h4>
+              <div class="row">
+                <div class="fld"><div class="lbl">串口设备</div>
+                  <select id="selDev">
+                    <option>/dev/ttyS1 — RK3566 UART</option>
+                    <option>/dev/ttyUSB0 — USB-TTL</option>
+                    <option>COM5 — Windows</option>
+                  </select></div>
+                <div class="fld"><div class="lbl">波特率</div>
+                  <select id="selBaud">
+                    <option>420000（ELRS 推荐）</option>
+                    <option>115200</option><option>57600</option>
+                  </select></div>
+                <div class="fld"><div class="lbl">流控</div>
+                  <select><option>无</option><option>硬件 RTS/CTS</option></select></div>
+                <div class="fld"><div class="lbl">协议</div>
+                  <select><option>CRSF v2</option><option>SBUS</option></select></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:9px;align-items:center">
+                <button class="btn" id="btnScan">⟳ 重新扫描</button>
+                <button class="btn pri" id="btnConn">连接</button>
+                <span class="stat warn" id="connStat"><span class="d"></span><span id="connStatTxt">未连接</span></span>
+              </div>
+            </div>
+            <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+              <h4>连接日志</h4>
+              <div class="log" id="connLog"></div>
+            </div>
+          </div>
+
+          <!-- 遥控 -->
+          <div class="sub" id="sub-rc">
+            <div class="rcgrid">
+              <div class="card" style="overflow-y:auto">
+                <h4>CRSF 通道 (16ch · 60Hz 合并 · 250Hz 输出)</h4>
+                <div id="chlist"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+                <div class="card">
+                  <h4>开关状态</h4>
+                  <div class="swwrap" id="swWrap"></div>
+                </div>
+                <div class="card">
+                  <h4>摇杆输入（模拟）</h4>
+                  <div class="stickbox">
+                    <div class="stick" id="stL"><div class="ax"></div><div class="ay"></div><div class="knob"></div></div>
+                    <div class="stick" id="stR"><div class="ax"></div><div class="ay"></div><div class="knob"></div></div>
+                  </div>
+                  <div style="margin-top:7px;text-align:center"><button class="btn sm">🎯 摇杆校准向导</button></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="colM">
-            <div class="artifical">
-              <div class="sky"></div><div class="gnd"></div>
-              <div class="frm">
-                <div class="tag">FPV 姿态</div>
-                <div class="vs"></div>
-                <div class="pit" id="pit">+2.4°</div>
-                <div class="rll" id="rll">横滚 -1.8° · 航向 243°</div>
-                <div class="osd">BAT <span id="osdBat">16.2V</span> · 8:32</div>
-                <div class="osd2">ALT <span id="osdAlt">58 m</span> · SPD 12.6</div>
+          <!-- 遥测 -->
+          <div class="sub" id="sub-tele">
+            <div class="gaugeWrap">
+              <div class="gauge" id="gRSSI"><svg viewBox="0 0 150 92"></svg><div class="gv">-85 dBm</div><div class="gl">RSSI 信号强度</div></div>
+              <div class="gauge" id="gLQ"><svg viewBox="0 0 150 92"></svg><div class="gv">85%</div><div class="gl">LQ 链路质量</div></div>
+            </div>
+            <div class="card">
+              <h4>电源 / 链路</h4>
+              <div class="statgrid">
+                <div class="cell"><div class="k">接收机电压</div><div class="vv" id="tVbat">4.85<span class="u">V</span></div></div>
+                <div class="cell"><div class="k">电流</div><div class="vv" id="tCur">0.86<span class="u">A</span></div></div>
+                <div class="cell"><div class="k">已消耗</div><div class="vv" id="tMah">342<span class="u">mAh</span></div></div>
+                <div class="cell"><div class="k">SNR</div><div class="vv" id="tSnr">8.2<span class="u">dB</span></div></div>
+                <div class="cell"><div class="k">发射功率</div><div class="vv" id="tTx">250<span class="u">mW</span></div></div>
+                <div class="cell"><div class="k">包率</div><div class="vv" id="tRate">250<span class="u">Hz</span></div></div>
+                <div class="cell"><div class="k">误帧率</div><div class="vv" id="tFer">0.3<span class="u">%</span></div></div>
+                <div class="cell"><div class="k">飞行模式</div><div class="vv" id="tMode" style="font-size:13px">ACRO</div></div>
               </div>
             </div>
-            <div class="telmeter">
-              <div class="tm good"><div class="k"><span class="ic" style="background:#27ae6022">📶</span>链路质量 LQ</div><div class="v" id="tLq">96<small>%</small></div></div>
-              <div class="tm" id="tmRssi"><div class="k"><span class="ic" style="background:#3daee922">📡</span>信号 RSSI</div><div class="v" id="tRssi">-71<small>dBm</small></div></div>
-              <div class="tm good"><div class="k"><span class="ic" style="background:#27ae6022">🔋</span>接收机电压</div><div class="v" id="tVbat">16.2<small>V</small></div></div>
-              <div class="tm warn"><div class="k"><span class="ic" style="background:#fdbc4b22">⚡</span>电流</div><div class="v" id="tCur">4.6<small>A</small></div></div>
+            <div class="card">
+              <h4>GPS 定位</h4>
+              <div class="gp">
+                <div class="it">纬度<b id="gLat">39.9042° N</b></div>
+                <div class="it">经度<b id="gLon">116.4074° E</b></div>
+                <div class="it">卫星<b id="gSat">8 颗</b></div>
+                <div class="it">HDOP<b id="gHdop">1.2</b></div>
+                <div class="it">地面速度<b id="gSpd">0.0 m/s</b></div>
+                <div class="it">高度<b id="gAlt">52 m</b></div>
+                <div class="it">航向<b id="gCrs">135°</b></div>
+                <div class="it">定位状态<b id="gFix">3D-FIX</b></div>
+              </div>
             </div>
           </div>
 
-          <div class="colR">
-            <div class="box chwrap" style="flex:1">
-              <h4>CRSF 通道 (16ch · 60Hz)</h4>
-              <div id="chlist"></div>
+          <!-- 通道映射 -->
+          <div class="sub" id="sub-map">
+            <div class="card" style="padding:0;overflow:auto;flex:1">
+              <table id="mapTbl">
+                <tr><th style="width:130px">物理输入</th><th style="width:110px">CRSF 通道</th><th style="width:60px">反向</th><th style="width:70px">死区 µs</th><th>范围 µs</th></tr>
+              </table>
             </div>
-            <div class="box" style="flex:none">
-              <h4>快捷键</h4>
-              <div class="fnkeys">
-                <div class="fn"><span class="fk">L</span>体感瞄准</div>
-                <div class="fn"><span class="fk">LZ</span>瞬时急停</div>
-                <div class="fn"><span class="fk">M1</span>模式切换</div>
-                <div class="fn"><span class="fk m">M4</span>屏幕截图</div>
-              </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn pri">💾 保存配置</button>
+              <button class="btn">↺ 恢复默认</button>
+              <span style="font-size:10px;color:var(--dim)">写入 ~/.config/makeitdo/channel_map.json · 热生效</span>
             </div>
           </div>
+
+          <!-- 固件升级 -->
+          <div class="sub" id="sub-fw">
+            <div class="card">
+              <h4>固件文件</h4>
+              <div class="row">
+                <div class="fld"><div class="lbl">固件 (.bin / .zip)</div>
+                  <input type="text" value="/home/makeitdo/Downloads/elrs-2.4g-tx-3.3.0.zip" readonly></div>
+                <div style="align-self:flex-end"><button class="btn">📂 浏览…</button></div>
+              </div>
+              <div style="display:flex;gap:14px;margin-top:8px;font-size:10.5px;color:var(--sub)">
+                <span>当前版本 <b style="color:#9ad7ff">3.2.1</b></span>
+                <span>目标版本 <b style="color:#9ad7ff">3.3.0</b></span>
+                <span>芯片 <b style="color:#9ad7ff">ESP32-S3</b></span>
+                <span style="margin-left:auto">集成 esptool · GPIO BOOT 自动下载模式</span>
+              </div>
+              <div style="margin-top:9px;display:flex;gap:8px">
+                <button class="btn pri" id="btnUpd">⬆ 开始升级</button>
+                <button class="btn" id="btnCancel" disabled>取消</button>
+              </div>
+            </div>
+            <div class="card">
+              <h4>升级进度</h4>
+              <div class="fwbar" style="margin-bottom:6px"><div class="fill" id="fwFill"></div></div>
+              <div style="font-size:10.5px;color:var(--sub)"><span id="fwPct">0%</span> · <span id="fwPh">等待开始</span></div>
+            </div>
+            <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+              <h4>升级日志</h4>
+              <div class="log" id="fwLog"></div>
+            </div>
+          </div>
+
+          <!-- 关于 -->
+          <div class="sub" id="sub-about">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#3daee9,#7fb4ff 55%,#35d0a0);
+                display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700;box-shadow:0 8px 24px rgba(61,174,233,.3)">M</div>
+              <div>
+                <div style="font-size:15px;font-weight:600">MAKEITDO ELRS 遥控控制台</div>
+                <div style="font-size:10.5px;color:var(--sub)">v1.0.0 · Qt Quick (QML) · 基于 CRSF v2 串口协议 · RK3566 / x86 双平台</div>
+              </div>
+            </div>
+            <div class="card">
+              <h4>串口状态诊断</h4>
+              <div class="diag">
+                <div class="d"><span>串口设备</span><b id="dgDev">—</b></div>
+                <div class="d"><span>波特率</span><b>420000</b></div>
+                <div class="d"><span>CRSF 握手</span><b id="dgHand">未握手</b></div>
+                <div class="d"><span>运行时长</span><b id="dgUptime">0s</b></div>
+                <div class="d"><span>收帧 / 发帧</span><b id="dgFrames">0 / 0</b></div>
+                <div class="d"><span>CRC 错误</span><b id="dgCrc">0</b></div>
+                <div class="d"><span>误帧率</span><b>0.3%</b></div>
+                <div class="d"><span>日志级别</span><b>INFO</b></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn">📄 导出诊断日志</button>
+              <button class="btn">🔗 GitHub</button>
+              <button class="btn">ℹ️ 许可协议</button>
+            </div>
+          </div>
+
+        </div>
         </div>
       </div>
 
@@ -412,7 +684,7 @@
           <div class="back" onclick="go('home')">‹</div>
           <h2>系统设置</h2>
           <span class="sp"></span>
-          <span class="gstat" style="font-size:11px;color:var(--sub)">MAKEITDO OS v1.2.0 · RK3566 · 6.1 LTS</span>
+          <span class="gstat">MAKEITDO OS v1.2.0 · RK3566 · 6.1 LTS</span>
         </div>
         <div class="setlist">
           <div class="setrow"><div class="ic">🛜</div><div class="nm"><b>WiFi</b><small>2.4G/5G · 热点模式 10.0.0.1</small></div><span class="val">已连接 · FPV-AP</span><span class="arr">›</span></div>
@@ -442,100 +714,339 @@
 </div>
 
 <script>
-  // ===== 时钟 =====
-  function tick(){
-    const d=new Date();
-    document.getElementById('clock').textContent=d.toLocaleTimeString('zh-CN',{hour12:false});
-    const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-    document.getElementById('date').textContent=d.getFullYear()+'-'+
-      String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+wd;
-  }
-  tick(); setInterval(tick,1000);
+/* ================= 时钟 ================= */
+function tick(){
+  const d=new Date();
+  document.getElementById('clock').textContent=d.toLocaleTimeString('zh-CN',{hour12:false});
+  const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  document.getElementById('date').textContent=d.getFullYear()+'-'+
+    String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+wd;
+}
+tick(); setInterval(tick,1000);
 
-  // ===== 视图切换 =====
-  function go(id){
-    document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  }
+/* ================= 视图切换 ================= */
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
 
-  // ===== 遥测模拟 (遥控模式) =====
-  let lq=96, rssi=-71;
-  const chNames=['R','Y','R','Y','R','Y','R','Y','R','Y','R','Y','R','Y','R','Y'].map((c,i)=>(
-    ['ROLL','PITCH','THROTTLE','YAW','ARM','FLMODE','AUX3','AUX4','AUX5','AUX6','AUX7','AUX8','AUX9','AUX10','AUX11','AUX12'][i]));
-  const chEls=[];
-  function buildCh(){
-    const box=document.getElementById('chlist');
-    box.innerHTML='';
-    for(let i=0;i<16;i++){
-      const r=document.createElement('div'); r.className='chrow';
-      r.innerHTML='<span class="cn">CH'+(i+1)+'</span><div class="tk"><div class="zero"></div><div class="fill"></div></div><span class="cv">1500</span>';
-      box.appendChild(r);
-      chEls.push({fill:r.querySelector('.fill'),cv:r.querySelector('.cv'),v:1500});
-    }
+/* ================= 飞行界面（原版恢复） ================= */
+function toggleConsole(show){
+  document.getElementById('rcFly').classList.toggle('hidden', !!show);
+  document.getElementById('rcConsole').classList.toggle('hidden', !show);
+}
+const rcChEls=[];
+(function buildRcCh(){
+  const box=document.getElementById('rcChlist');
+  const names=['ROLL','PITCH','THROTTLE','YAW','ARM','FLMODE','AUX3','AUX4','AUX5','AUX6','AUX7','AUX8','AUX9','AUX10','AUX11','AUX12'];
+  for(let i=0;i<16;i++){
+    const r=document.createElement('div'); r.className='chrow';
+    r.innerHTML='<span class="cn">CH'+(i+1)+'</span><div class="tk"><div class="zero"></div><div class="fill"></div></div><span class="cv">1500</span>';
+    box.appendChild(r);
+    rcChEls.push({fill:r.querySelector('.fill'),cv:r.querySelector('.cv'),v:1500});
   }
-  buildCh();
-  function chAnim(){
-    chEls.forEach((e,i)=>{
-      const base=[1500,1500,1150,1500,1000,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500][i];
-      const amp=i===2?160:(i===0||i===1||i===3?90:8);
-      e.v = base + Math.sin(performance.now()/420*(i+2)+i)*amp + (Math.random()-0.5)*14;
-      e.v = Math.max(988,Math.min(2012,e.v));
-      const p=(e.v-1000)/10;
-      e.fill.style.left=(50-p/2)+'%';
-      e.fill.style.width=p+'%';
-      e.cv.textContent=Math.round(e.v);
-    });
-    // 遥测
-    lq = Math.max(88,Math.min(99,lq+(Math.random()-0.5)*3));
-    rssi = Math.max(-92,Math.min(-52,rssi+(Math.random()-0.5)*4));
-    const lqEl=document.getElementById('tLq');
-    lqEl.textContent=Math.round(lq);
-    lqEl.parentElement.className=lq>92?'tm good':(lq>80?'tm warn':'tm bad');
-    const rsEl=document.getElementById('tRssi');
-    rsEl.textContent=Math.round(rssi);
-    const rssiBox=document.getElementById('tmRssi');
-    rssiBox.className=rssi>-75?'tm good':(rssi>-90?'tm warn':'tm bad');
-    document.getElementById('sbRssi').textContent=Math.round(rssi)+'dBm';
-    document.getElementById('hLq').textContent=Math.round(lq)+'%';
-    document.getElementById('hRssi').textContent=Math.round(rssi);
-    // 油门
-    const th=chEls[2].v;
-    const thP=Math.max(0,Math.min(100,(th-1000)/10));
-    document.getElementById('thBar').style.width=thP+'%';
-    document.getElementById('thVal').textContent=Math.round(thP)+'%';
-    // 姿态抖动
-    const pit=(Math.sin(performance.now()/900)*2.2+(Math.random()-0.5)*0.8).toFixed(1);
-    document.getElementById('pit').textContent=(pit>=0?'+':'')+pit+'°';
-    document.getElementById('rll').textContent='横滚 '+((Math.sin(performance.now()/700)*1.5).toFixed(1))+'° · 航向 '+(243+Math.round(Math.sin(performance.now()/1300)*8))+'°';
-  }
-  setInterval(chAnim,90);
-
-  // ===== 游戏列表 =====
-  const games=[
-    {n:'火焰纹章·封印之剑',s:'GBA',c:'S',t:'🔥',sel:true},
-    {n:'塞尔达 缩小帽',s:'GBA',c:'S',t:'🗡'},
-    {n:'精灵宝可梦 绿宝石',s:'GBA',c:'S',t:'⚡'},
-    {n:'超级马力欧 64',s:'N64',c:'N',t:'🍄'},
-    {n:'马里奥赛车 64',s:'N64',c:'N',t:'🏎'},
-    {n:'最终幻想 VII',s:'PS1',c:'P',t:'✨'},
-    {n:'生化危机 2',s:'PS1',c:'P',t:'🧟'},
-    {n:'超时空之轮',s:'SFC',c:'S',t:'⏳'},
-    {n:'超级大金刚 2',s:'SFC',c:'S',t:'🍌'},
-    {n:'银河战士 融合',s:'GBA',c:'S',t:'🌌'},
-    {n:'口袋妖怪 红宝石',s:'GBA',c:'S',t:'💎'},
-    {n:'古惑狼赛车',s:'PS1',c:'P',t:'🐺'},
-    {n:'大金刚 64',s:'N64',c:'N',t:'🐵'},
-    {n:'塞尔达传说 时之笛',s:'N64',c:'N',t:'🛡'},
-    {n:'恶魔城 月下夜想曲',s:'PS1',c:'P',t:'🦇'},
-  ];
-  const ggrid=document.getElementById('ggrid');
-  games.forEach(g=>{
-    const d=document.createElement('div');
-    d.className='gitem'+(g.sel?' sel':'');
-    d.innerHTML='<div class="thumb"><div class="ct '+g.c+'">'+g.t+'</div></div><div class="meta"><b>'+g.n+'</b><i>'+g.s+' · '+g.c+'核</i></div>';
-    d.onclick=()=>{ggrid.querySelectorAll('.gitem').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};
-    ggrid.appendChild(d);
+})();
+let flySec=0;
+function rcChAnim(){
+  rcChEls.forEach((e,i)=>{
+    const base=[1500,1500,1150,1500,1000,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500,1500][i];
+    const amp=i===2?160:(i===0||i===1||i===3?90:8);
+    e.v = base + Math.sin(Date.now()/420*(i+2)+i)*amp + (Math.random()-0.5)*14;
+    e.v = Math.max(988,Math.min(2012,e.v));
+    const p=(e.v-1000)/10;
+    e.fill.style.left=(50-p/2)+'%';
+    e.fill.style.width=p+'%';
+    e.cv.textContent=Math.round(e.v);
   });
+  const thP=Math.max(0,Math.min(100,(rcChEls[2].v-1000)/10));
+  document.getElementById('thBar').style.width=thP+'%';
+  document.getElementById('thVal').textContent=Math.round(thP)+'%';
+  const pit=(Math.sin(Date.now()/900)*2.2+(Math.random()-0.5)*0.8).toFixed(1);
+  document.getElementById('pit').textContent=(pit>=0?'+':'')+pit+'°';
+  document.getElementById('rll').textContent='横滚 '+((Math.sin(Date.now()/700)*1.5).toFixed(1))+'° · 航向 '+(243+Math.round(Math.sin(Date.now()/1300)*8))+'°';
+}
+setInterval(rcChAnim,90);
+
+/* ================= 控制台二级 Tab ================= */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.sub').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  document.getElementById('sub-'+t.dataset.t).classList.add('on');
+}));
+
+/* ================= 连接模拟 ================= */
+let connected = false, connLog;
+function logLine(el, txt, cls=''){
+  const d = document.createElement('div');
+  const t = new Date().toLocaleTimeString('zh-CN',{hour12:false});
+  d.innerHTML = `<span class="t">[${t}]</span> ${txt}`;
+  d.className = cls;
+  el.appendChild(d); el.scrollTop = el.scrollHeight;
+}
+function connSwitch(on){
+  connected = on;
+  const s = document.getElementById('connStat'), txt = document.getElementById('connStatTxt');
+  const btn = document.getElementById('btnConn');
+  const elrs = document.getElementById('rcElrs'), sbDot = document.getElementById('sbDot');
+  const mc = document.getElementById('mcConn');
+  if(on){
+    s.className='stat ok'; txt.textContent='已连接 · CRSF'; btn.textContent='断开'; btn.classList.remove('pri'); btn.classList.add('dng');
+    elrs.classList.remove('off'); elrs.innerHTML='<span class="d"></span>ELRS 已连接 · 250Hz';
+    sbDot.style.background='var(--green)'; sbDot.style.boxShadow='0 0 6px var(--green)';
+    mc.className='stat'; mc.textContent='● 已连接';
+    logLine(connLog,'CRSF 握手成功，进入 250Hz 链路模式','g');
+    logLine(connLog,'收到 Link Statistics 帧（RSSI -85dBm / LQ 85%）','g');
+  }else{
+    s.className='stat warn'; txt.textContent='未连接'; btn.textContent='连接'; btn.classList.add('pri'); btn.classList.remove('dng');
+    elrs.classList.add('off'); elrs.innerHTML='<span class="d"></span>ELRS 未连接';
+    sbDot.style.background='var(--red)'; sbDot.style.boxShadow='none';
+    mc.className='stat off'; mc.textContent='○ 未连接';
+    logLine(connLog,'串口已断开，通道安全归零','e');
+  }
+}
+document.getElementById('btnConn').addEventListener('click',()=>{
+  if(!connected){
+    document.getElementById('connStatTxt').textContent='连接中…';
+    logLine(connLog,'打开串口 /dev/ttyS1 @ 420000 baud …');
+    logLine(connLog,'发送 CRSF 握手帧 (0xEA) …');
+    setTimeout(()=>connSwitch(true), 900);
+  } else connSwitch(false);
+});
+document.getElementById('btnScan').addEventListener('click',()=>{
+  logLine(connLog,'扫描串口：发现 /dev/ttyS1, /dev/ttyUSB0, /dev/ttyUSB1');
+});
+
+/* ================= 通道条 ================= */
+const CH_NAMES = ['油门','偏航','横滚','俯仰','ARM','模式','蜂鸣','GPS救援','微调','电位器1','电位器2','旋钮1','旋钮2','按键1','按键2','自定义'];
+const chEls = [];
+CH_NAMES.forEach((n,i)=>{
+  const d = document.createElement('div'); d.className='chrow';
+  d.innerHTML = `<span class="cn">CH${i+1} <small>${n}</small></span>
+    <div class="tk"><div class="zero"></div><div class="fill"></div></div>
+    <span class="cv">1500</span>`;
+  document.getElementById('chlist').appendChild(d);
+  chEls.push({ fill:d.querySelector('.fill'), cv:d.querySelector('.cv'), v:1500 });
+});
+
+/* ================= 开关状态 ================= */
+const SW_DEF = [['ARM 解锁',false],['模式 · ACRO',true],['蜂鸣',false],['GPS 救援',false],['LED 灯带',true],['录像',false]];
+const swEls = [];
+SW_DEF.forEach(([name,on])=>{
+  const d = document.createElement('div'); d.className='swi';
+  d.innerHTML = `<span class="swt${on?' on':''}"></span><span>${name}</span>`;
+  const sw = d.querySelector('.swt');
+  sw.addEventListener('click',()=>sw.classList.toggle('on'));
+  document.getElementById('swWrap').appendChild(d); swEls.push(sw);
+});
+
+/* ================= 仪表（SVG 半圆 gauge） ================= */
+function drawGauge(svg, val, min, max, color){
+  svg.innerHTML='';
+  const r=52, cx=75, cy=80, a0=Math.PI, a1=2*Math.PI;
+  const ns='http://www.w3.org/2000/svg';
+  const arc=(a,b)=>{const p=[];
+    for(let i=0;i<=24;i++){const t=a+(b-a)*i/24;
+      p.push(`${(cx+Math.cos(t)*r).toFixed(1)},${(cy+Math.sin(t)*r).toFixed(1)}`);}
+    return p.join(' ');};
+  const pol=(pts,cls)=>{const p=document.createElementNS(ns,'polyline');p.setAttribute('points',pts);
+    p.setAttribute('fill','none');p.setAttribute('stroke',cls);p.setAttribute('stroke-width','9');
+    p.setAttribute('stroke-linecap','round');svg.appendChild(p);};
+  pol(arc(a0,a1),'#1c1f22');
+  const frac=(val-min)/(max-min);
+  pol(arc(a0,a0+Math.PI*Math.max(0.02,Math.min(0.98,frac))), color);
+  for(let i=0;i<=4;i++){
+    const t=a0+(a1-a0)*i/4;
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',cx+Math.cos(t)*44);l.setAttribute('y1',cy+Math.sin(t)*44);
+    l.setAttribute('x2',cx+Math.cos(t)*50);l.setAttribute('y2',cy+Math.sin(t)*50);
+    l.setAttribute('stroke','#58606a');l.setAttribute('stroke-width','2');svg.appendChild(l);
+  }
+}
+
+/* ================= 数据模拟 ================= */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+let chVals = CH_NAMES.map(()=>1500);
+let tele = { rssi:-85, lq:85, vbat:4.85, cur:0.86, mah:342, snr:8.2, mode:'ACRO', sat:8, hdop:1.2, fer:0.3 };
+
+/* 通道 60Hz 模拟 */
+setInterval(()=>{
+  if(!connected){ chVals = CH_NAMES.map(()=>1500); }
+  else {
+    chVals[0]=clamp(1500+Math.sin(Date.now()/500)*300 + rnd(-12,12),1000,2000);
+    for(let i=1;i<4;i++) chVals[i]=clamp(1500+Math.sin(Date.now()/300+i)*150+rnd(-8,8),1000,2000);
+    for(let i=5;i<16;i++) chVals[i]=clamp(chVals[i]+rnd(-2,2),1000,2000);
+    chVals[6]=1000; chVals[7]=1000;
+    chVals[4]=swEls[0].classList.contains('on')?2000:1000;
+  }
+  chEls.forEach((e,i)=>{
+    const v=chVals[i], p=(v-1000)/10;
+    e.fill.style.left=(50-p/2)+'%';
+    e.fill.style.width=p+'%';
+    e.cv.textContent=Math.round(v);
+  });
+  const sx = Math.sin(Date.now()/400)*22, sy=Math.cos(Date.now()/520)*22;
+  document.querySelector('#stL .knob').style.transform=`translate(${sx}px,${sy}px)`;
+  const rx = Math.sin(Date.now()/360+1)*20, ry=Math.cos(Date.now()/440+1)*20;
+  document.querySelector('#stR .knob').style.transform=`translate(${rx}px,${ry}px)`;
+  /* 主界面卡片联动 */
+  const th=chVals[0], thP=Math.max(0,Math.min(100,(th-1000)/10));
+  const lqN=Math.round(tele.lq), rssiN=Math.round(tele.rssi);
+  document.getElementById('hLq').textContent=lqN+'%';
+  document.getElementById('hRssi').textContent=rssiN;
+  if(connected){
+    document.getElementById('sbRssi').textContent=rssiN+'dBm';
+  }
+},16);
+
+/* 遥测 2Hz 模拟 */
+setInterval(()=>{
+  if(connected){
+    tele.rssi=clamp(tele.rssi+rnd(-1.5,1.5),-105,-40);
+    tele.lq=clamp(tele.lq+rnd(-1.5,1.5),55,100);
+    tele.vbat=clamp(tele.vbat+rnd(-0.01,0.01),4.2,5.0);
+    tele.cur=rnd(0.4,1.4); tele.mah+=tele.cur*0.5;
+    tele.snr=clamp(tele.snr+rnd(-0.3,0.3),0,15);
+    tele.fer=rnd(0.1,0.8); tele.sat=7+Math.floor(Math.random()*3);
+    tele.hdop=clamp(tele.hdop+rnd(-0.1,0.1),0.8,2.5);
+  }
+  drawGauge(document.querySelector('#gRSSI svg'), tele.rssi, -120, 0, tele.rssi>-70?'#35d0a0':(tele.rssi>-95?'#fdbc4b':'#da4453'));
+  drawGauge(document.querySelector('#gLQ svg'), tele.lq, 0, 100, tele.lq>70?'#3daee9':(tele.lq>40?'#fdbc4b':'#da4453'));
+  document.querySelector('#gRSSI .gv').textContent=tele.rssi.toFixed(0)+' dBm';
+  document.querySelector('#gLQ .gv').textContent=tele.lq.toFixed(0)+'%';
+
+  const vbat=document.getElementById('tVbat');
+  vbat.innerHTML=tele.vbat.toFixed(2)+'<span class="u">V</span>';
+  vbat.parentElement.classList.toggle('alert', tele.vbat<4.5);
+  document.getElementById('tCur').innerHTML=tele.cur.toFixed(2)+'<span class="u">A</span>';
+  document.getElementById('tMah').innerHTML=tele.mah.toFixed(0)+'<span class="u">mAh</span>';
+  document.getElementById('tSnr').innerHTML=tele.snr.toFixed(1)+'<span class="u">dB</span>';
+  document.getElementById('tTx').innerHTML='250<span class="u">mW</span>';
+  document.getElementById('tRate').innerHTML='250<span class="u">Hz</span>';
+  document.getElementById('tFer').innerHTML=tele.fer.toFixed(1)+'<span class="u">%</span>';
+  document.getElementById('tMode').textContent=tele.mode;
+  document.getElementById('gLat').textContent=(39.9+rnd(-0.01,0.01)).toFixed(4)+'° N';
+  document.getElementById('gLon').textContent=(116.4+rnd(-0.01,0.01)).toFixed(4)+'° E';
+  document.getElementById('gSat').textContent=tele.sat+' 颗';
+  document.getElementById('gHdop').textContent=tele.hdop.toFixed(1);
+  document.getElementById('gSpd').textContent=rnd(0,2.5).toFixed(1)+' m/s';
+  document.getElementById('gAlt').textContent=(50+rnd(-3,3)).toFixed(0)+' m';
+  document.getElementById('gCrs').textContent=(130+rnd(-8,8)).toFixed(0)+'°';
+  document.getElementById('gFix').textContent='3D-FIX';
+
+  /* 飞行界面遥测联动（复用同一数据源） */
+  flySec++;
+  document.getElementById('osdTime').textContent=Math.floor(flySec/60)+':'+String(flySec%60).padStart(2,'0');
+  document.getElementById('fLq').innerHTML=tele.lq.toFixed(0)+'<small>%</small>';
+  document.getElementById('fLq').parentElement.className=tele.lq>92?'tm good':(tele.lq>80?'tm warn':'tm bad');
+  document.getElementById('tmRssi').className=tele.rssi>-75?'tm good':(tele.rssi>-90?'tm warn':'tm bad');
+  document.getElementById('fRssi').innerHTML=tele.rssi.toFixed(0)+'<small>dBm</small>';
+  document.getElementById('fVbat').innerHTML=tele.vbat.toFixed(2)+'<small>V</small>';
+  document.getElementById('fCur').innerHTML=tele.cur.toFixed(2)+'<small>A</small>';
+  document.getElementById('fSat').textContent=tele.sat;
+  document.getElementById('fDist').textContent=Math.round(380+Math.random()*180)+' m';
+  document.getElementById('osdBat').textContent=tele.vbat.toFixed(2)+'V';
+  document.getElementById('osdAlt').textContent=Math.round(50+Math.random()*12)+' m';
+  document.getElementById('osdSpd').textContent=(10+Math.random()*6).toFixed(1);
+},500);
+
+/* ================= 通道映射表 ================= */
+const MAP = [
+  ['摇杆 L · X（左右）','CH1',''],
+  ['摇杆 L · Y（上下）','CH2',''],
+  ['摇杆 R · X（左右）','CH3',''],
+  ['摇杆 R · Y（上下）','CH4',''],
+  ['开关 SW_A（两段）','CH5','1'],
+  ['开关 SW_B（三段）','CH6','1'],
+  ['拨盘 VR1','CH7',''],
+  ['拨盘 VR2','CH8',''],
+  ['按键 BTN1','CH9','1'],
+  ['未分配','CH10',''],
+];
+const mapTbl = document.getElementById('mapTbl');
+MAP.forEach(([inp,ch,rev])=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${inp}</td><td><select>
+      ${['CH1','CH2','CH3','CH4','CH5','CH6','CH7','CH8','CH9','CH10','CH11','CH12','CH13','CH14','CH15','CH16','— 禁用']
+        .map((c,i)=>`<option ${ch===('CH'+(i+1))?'selected':''}>${c}</option>`).join('')}
+    </select></td>
+    <td><span class="swt ${rev?'on':''}" onclick="this.classList.toggle('on')"></span></td>
+    <td><input type="text" value="8"></td>
+    <td><input type="text" value="1000–2000"></td>`;
+  mapTbl.appendChild(tr);
+});
+
+/* ================= 固件升级 ================= */
+let fwState=0;
+const fwFill=document.getElementById('fwFill'), fwPct=document.getElementById('fwPct'), fwPh=document.getElementById('fwPh');
+const fwLog=document.getElementById('fwLog');
+const btnUpd=document.getElementById('btnUpd'), btnCancel=document.getElementById('btnCancel');
+const fwSteps=[
+  ['关闭串口并释放',()=>logLine(fwLog,'关闭串口 /dev/ttyS1 …','b')],
+  ['拉低 BOOT (GPIO8) 进入下载模式',()=>logLine(fwLog,'gpioset 0 8=0 · 复位芯片 (GPIO9)','b')],
+  ['擦除 Flash (esptool)',()=>logLine(fwLog,'esptool.py --chip esp32s3 erase_flash …')],
+  ['写入固件 4.2 MB',()=>logLine(fwLog,'Writing at 0x00010000 … 100%','g')],
+  ['校验 + 复位运行',()=>logLine(fwLog,'Hash of data verified ✓ · 重启模组','g')],
+];
+function fwTick(){
+  if(fwState>=100){ fwFill.classList.add('done'); fwPct.textContent='100%'; fwPh.textContent='升级完成，等待重启'; logLine(fwLog,'升级成功，串口重连中…','g'); btnUpd.disabled=false; btnCancel.disabled=true; return; }
+  fwState=Math.min(100, fwState+2);
+  fwFill.style.width=fwState+'%';
+  fwPct.textContent=fwState+'%';
+  const idx=Math.floor(fwState/ (100/fwSteps.length));
+  const st=fwSteps[Math.min(idx,fwSteps.length-1)];
+  fwPh.textContent=st[0];
+  if(fwState%16===0) st[1]();
+  setTimeout(fwTick, 140);
+}
+btnUpd.addEventListener('click',()=>{
+  fwState=0; fwFill.classList.remove('done'); fwFill.style.width='0%';
+  btnUpd.disabled=true; btnCancel.disabled=false;
+  logLine(fwLog,'=== 开始固件升级 v3.2.1 → v3.3.0 ===','b');
+  fwTick();
+});
+btnCancel.addEventListener('click',()=>{ fwState=100; fwFill.style.width='100%'; fwPh.textContent='已取消'; logLine(fwLog,'用户取消升级','e'); });
+
+/* ================= 初始化 ================= */
+connLog = document.getElementById('connLog');
+logLine(connLog,'MAKEITDO ELRS Console v1.0.0 启动');
+logLine(connLog,'自动扫描串口 … 发现 /dev/ttyS1');
+drawGauge(document.querySelector('#gRSSI svg'), tele.rssi, -120, 0, '#35d0a0');
+drawGauge(document.querySelector('#gLQ svg'), tele.lq, 0, 100, '#3daee9');
+
+/* 关于页动态 */
+setInterval(()=>{
+  const t=document.getElementById('dgUptime');
+  const s=parseInt(t.textContent.replace(/\D/g,''))||0;
+  t.textContent=(s+1)+'s';
+  document.getElementById('dgFrames').textContent=(connected?'0':'0')+' / '+(connected? '6250':'0');
+  document.getElementById('dgCrc').textContent=connected?'0':'0';
+  document.getElementById('dgDev').textContent=connected?'/dev/ttyS1':'—';
+  document.getElementById('dgHand').textContent=connected?'已握手 ✓':'未握手';
+},1000);
+
+/* ================= 游戏列表 ================= */
+const games=[
+  {n:'火焰纹章·封印之剑',s:'GBA',c:'S',t:'🔥',sel:true},
+  {n:'塞尔达 缩小帽',s:'GBA',c:'S',t:'🗡'},
+  {n:'精灵宝可梦 绿宝石',s:'GBA',c:'S',t:'⚡'},
+  {n:'超级马力欧 64',s:'N64',c:'N',t:'🍄'},
+  {n:'马里奥赛车 64',s:'N64',c:'N',t:'🏎'},
+  {n:'最终幻想 VII',s:'PS1',c:'P',t:'✨'},
+  {n:'生化危机 2',s:'PS1',c:'P',t:'🧟'},
+  {n:'超时空之轮',s:'SFC',c:'S',t:'⏳'},
+  {n:'超级大金刚 2',s:'SFC',c:'S',t:'🍌'},
+  {n:'银河战士 融合',s:'GBA',c:'S',t:'🌌'},
+];
+const ggrid=document.getElementById('ggrid');
+games.forEach(g=>{
+  const d=document.createElement('div');
+  d.className='gitem'+(g.sel?' sel':'');
+  d.innerHTML='<div class="thumb"><div class="ct '+g.c+'">'+g.t+'</div></div><div class="meta"><b>'+g.n+'</b><i>'+g.s+' · '+g.c+'核</i></div>';
+  d.onclick=()=>{ggrid.querySelectorAll('.gitem').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};
+  ggrid.appendChild(d);
+});
 </script>
 </body>
 </html>

@@ -11,3 +11,6 @@ build/
 *.swo
 *~
 .DS_Store
+
+# 独立的 my-skills 仓库，不纳入本仓库
+skills/

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESP32-2432S0248R-PLUS 显示效果图</title>
+<style>
+:root{
+  --pcb:#0d4a34;
+  --pcb-dark:#093625;
+  --silk:#dfe8d8;
+  --gold:#c9a84c;
+  --accent:#22d3ee;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  background:radial-gradient(1200px 800px at 70% -10%,#122a3e 0%,#0b1622 45%,#070d15 100%);
+  color:#e6edf3;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* ================= 顶部 ================= */
+header{
+  text-align:center;padding:34px 16px 8px;
+}
+header h1{
+  font-size:26px;letter-spacing:1px;font-weight:800;
+  background:linear-gradient(90deg,#7dd3fc,#22d3ee,#a5f3fc);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+header p{
+  margin-top:8px;color:#8aa0b5;font-size:13px;letter-spacing:.5px;
+}
+header p b{color:#bfe9ff;font-weight:600}
+
+/* ================= 场景切换 ================= */
+.tabs{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:10px;
+  margin:20px auto 8px;padding:0 16px;max-width:1120px;
+}
+.tab{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  color:#c9d8e4;padding:9px 16px;border-radius:999px;cursor:pointer;
+  font-size:13px;transition:.22s;user-select:none;
+}
+.tab .dot{width:8px;height:8px;border-radius:50%;background:#475569}
+.tab:hover{background:rgba(255,255,255,.1);transform:translateY(-1px)}
+.tab.active{
+  background:linear-gradient(90deg,#0ea5e9,#06b6d4);
+  border-color:transparent;color:#04121a;font-weight:700;box-shadow:0 6px 20px rgba(14,165,233,.35);
+}
+.tab.active .dot{background:#04121a}
+
+/* ================= 主体布局 ================= */
+main{
+  display:flex;justify-content:center;align-items:flex-start;gap:36px;
+  padding:10px 16px 60px;max-width:1120px;margin:0 auto;flex-wrap:wrap;
+}
+.stage{
+  flex:0 0 auto;position:relative;
+  --bs:1.05;
+  width:calc(240px*var(--bs));height:calc(432px*var(--bs));
+}
+@media (max-width:900px){.stage{--bs:.92}}
+@media (max-width:560px){.stage{--bs:.72}}
+
+/* ================= 板卡 ================= */
+.board{
+  width:240px;height:432px;position:absolute;left:0;top:0;
+  transform:scale(var(--bs));transform-origin:top left;
+  filter:drop-shadow(0 26px 44px rgba(0,0,0,.55));
+}
+.pcb{
+  width:240px;height:424px;position:absolute;left:0;top:0;
+  background:
+    radial-gradient(120px 90px at 85% 8%,rgba(255,255,255,.07),transparent 60%),
+    linear-gradient(160deg,var(--pcb) 0%,var(--pcb-dark) 100%);
+  border-radius:14px;border:1px solid #07301f;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 -2px 8px rgba(0,0,0,.4);
+  overflow:hidden;
+}
+/* 走线纹理 */
+.pcb::before{
+  content:"";position:absolute;inset:0;border-radius:14px;opacity:.35;
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.028) 0 2px,transparent 2px 14px),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.05) 0 2px,transparent 2px 16px);
+  pointer-events:none;
+}
+/* 丝印文字 */
+.silk{position:absolute;color:var(--silk);font-weight:600;letter-spacing:.4px;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+.silk-main{left:16px;top:298px;font-size:8px}
+.silk-sub{left:16px;top:310px;font-size:6.5px;color:#a7bbab;font-weight:400}
+.silk-mod{left:186px;top:298px;font-size:5.5px;color:#c8d8cc}
+.silk-ver{left:16px;top:334px;font-size:6.5px;color:#9db3a1}
+
+/* 安装孔 */
+.hole{position:absolute;width:10px;height:10px;border-radius:50%;
+  background:#0a2b1d;box-shadow:inset 0 2px 3px rgba(0,0,0,.8),0 0 0 2px var(--gold),0 0 0 3px rgba(0,0,0,.4)}
+.h1{left:9px;top:9px}.h2{right:9px;top:9px}.h3{left:9px;bottom:11px}.h4{right:9px;bottom:11px}
+
+/* ================= 屏幕 ================= */
+.screen-bezel{
+  position:absolute;left:17px;top:12px;width:206px;height:278px;
+  background:linear-gradient(180deg,#23262b,#101216);
+  border-radius:8px;border:1px solid #05070a;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.06);
+  padding:4px;
+}
+.screen{
+  position:relative;width:198px;height:270px;border-radius:4px;overflow:hidden;
+  background:#000;cursor:pointer;
+  /* 将 240x320 渲染区缩放到 198x270 (×0.825) */
+}
+.screen-scale{
+  position:absolute;left:0;top:0;width:240px;height:320px;
+  transform:scale(.825);transform-origin:top left;
+}
+/* 玻璃反光 */
+.screen-glare{
+  position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:4px;
+  background:linear-gradient(115deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.02) 24%,transparent 45%);
+}
+
+/* ---- 场景通用 ---- */
+.scene{position:absolute;left:0;top:0;width:240px;height:320px;display:none;overflow:hidden;font-family:"Microsoft YaHei",sans-serif}
+.scene.active{display:block}
+.ripple-layer{position:absolute;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+.ripple{
+  position:absolute;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.65),rgba(255,255,255,.15) 60%,transparent 70%);
+  animation:rip .7s ease-out forwards;
+}
+@keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(6);opacity:0}}
+
+/* ============ 场景1: 天气时钟 (27_Desktop_Display) ============ */
+.scene-clock{background:#fff;color:#10243e}
+.clk-city{position:absolute;left:8px;top:7px;font-size:13px;font-weight:700;color:#10243e}
+.clk-aqi{
+  position:absolute;left:96px;top:7px;background:#16a34a;color:#fff;
+  font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+}
+.clk-aqi sub{font-size:8px;font-weight:400;margin-left:2px;opacity:.9}
+.clk-weather{position:absolute;right:8px;top:2px;width:40px;height:40px}
+.banner{
+  position:absolute;left:6px;top:44px;width:228px;height:26px;overflow:hidden;
+  background:#eef3f7;border-radius:6px;border:1px solid #e2e9f0;
+  display:flex;align-items:center;
+}
+.banner-track{
+  white-space:nowrap;font-size:11px;color:#33475c;letter-spacing:.4px;
+  animation:marq 16s linear infinite;will-change:transform;
+}
+@keyframes marq{to{transform:translateX(-50%)}}
+.clk-time{position:absolute;left:8px;top:80px;display:flex;align-items:flex-start;color:#0b2545}
+.clk-time .h{font-family:Consolas,"Courier New",monospace;font-weight:800;font-size:66px;line-height:1;letter-spacing:-2px}
+.clk-time .colon{font-family:Consolas,monospace;font-weight:800;font-size:48px;line-height:1;margin:0 1px;animation:blink 1s steps(1) infinite}
+.clk-time .m{font-family:Consolas,monospace;font-weight:800;font-size:66px;line-height:1;letter-spacing:-2px}
+.clk-time .s{
+  font-family:Consolas,monospace;font-weight:800;font-size:26px;line-height:1;
+  color:#0891b2;margin-left:8px;margin-top:8px;min-width:40px;
+}
+@keyframes blink{50%{opacity:0}}
+.clk-date{position:absolute;left:8px;top:158px;font-size:19px;font-weight:700;color:#0b2545}
+.clk-week{position:absolute;right:10px;top:162px;font-size:13px;color:#0891b2;font-weight:700;background:#e0f2fe;padding:2px 9px;border-radius:999px}
+.weather-row{position:absolute;left:10px;width:228px;height:52px}
+.weather-row .ico{position:absolute;left:0;top:6px;width:30px;height:30px}
+.weather-row .val{position:absolute;left:40px;top:8px;font-size:17px;font-weight:700;color:#0b2545;width:56px}
+.weather-row .val b{font-size:11px;color:#0891b2}
+.weather-row .track{
+  position:absolute;left:104px;top:18px;width:122px;height:9px;border-radius:6px;
+  background:#e6edf3;overflow:hidden;
+}
+.weather-row .track i{
+  display:block;height:100%;border-radius:6px;width:0;
+  transition:width 1.2s ease;background:linear-gradient(90deg,#f59e0b,#ef4444);
+}
+.wr-hum .track i{background:linear-gradient(90deg,#38bdf8,#0891b2)}
+.wr-temp{top:196px}.wr-hum{top:240px}
+.astro{position:absolute;right:6px;top:208px;width:84px;height:94px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.15))}
+.astro-bob{animation:bob 2.4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.astro .armR{animation:wave 1.7s ease-in-out infinite;transform-origin:68px 56px}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-15deg)}}
+
+/* ============ 场景2: 拨号界面 (28_display_phonecall) ============ */
+.scene-phone{background:linear-gradient(180deg,#0a47d6,#0635b0);color:#fff}
+.ph-status{
+  position:absolute;left:0;top:0;width:240px;height:26px;background:#000;color:#9be8ff;
+  display:flex;align-items:center;justify-content:space-between;padding:0 8px;
+  font-size:11px;letter-spacing:1px;font-family:Consolas,monospace;
+}
+.ph-screen{
+  position:absolute;left:14px;top:32px;width:212px;height:60px;background:#fff;border-radius:8px;
+  color:#0a2a6b;padding:8px 12px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.ph-num{font-size:24px;font-weight:800;font-family:Consolas,monospace;letter-spacing:1px;white-space:nowrap;overflow:hidden}
+.ph-call{font-size:12px;color:#eab308;display:none;animation:blink 1s infinite}
+.ph-call.show{display:block}
+.ph-keypad{position:absolute;left:16px;top:100px;width:208px}
+.ph-grid{display:grid;grid-template-columns:repeat(3,36px);gap:8px 10px;justify-content:center}
+.ph-key{
+  width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#5ff4ff,#00c8e8 60%,#00a9cf);
+  color:#033a4a;font-size:16px;font-weight:800;font-family:Consolas,monospace;
+  box-shadow:0 4px 0 #007a99,inset 0 2px 3px rgba(255,255,255,.6);
+  transition:transform .08s;user-select:none;
+}
+.ph-key:active{transform:scale(.9);box-shadow:0 2px 0 #007a99}
+.ph-actions{display:flex;justify-content:center;gap:16px;margin-top:12px}
+.ph-action{
+  width:56px;height:32px;border-radius:16px;border:none;cursor:pointer;color:#fff;
+  font-size:11px;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.35);transition:transform .08s;
+}
+.ph-action:active{transform:scale(.92)}
+.ph-hang{background:radial-gradient(circle at 35% 30%,#ff6b61,#f43f5e 60%,#d62839)}
+.ph-dial{background:radial-gradient(circle at 35% 30%,#6ee7b7,#10b981 60%,#059669)}
+.ph-del{background:radial-gradient(circle at 35% 30%,#cbd5e1,#94a3b8 60%,#64748b)}
+.ph-wave{display:none}
+.ph-wave.show{display:flex;align-items:center;gap:5px;margin-top:6px}
+.ph-wave i{width:7px;height:7px;border-radius:50%;background:#10b981;animation:waveDot 1s infinite}
+.ph-wave i:nth-child(2){animation-delay:.15s}.ph-wave i:nth-child(3){animation-delay:.3s}
+@keyframes waveDot{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+
+/* ============ 场景3: LVGL 控件 (31_LVGL_Demos) ============ */
+.scene-lvgl{background:#171a21;color:#e8ecf3}
+.lv-header{position:absolute;left:0;top:0;width:240px;height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:linear-gradient(90deg,#0d1117,#161b26)}
+.lv-header .t{font-size:13px;font-weight:700}
+.lv-header .tm{font-size:12px;color:#8b96a8;font-family:Consolas,monospace}
+.lv-card{
+  position:absolute;background:#1f242e;border:1px solid #2c333f;border-radius:10px;padding:8px 10px;
+}
+.lv-card .cap{font-size:10px;color:#8b96a8;letter-spacing:.5px}
+.lv-gauge{left:10px;top:44px;width:106px;height:106px}
+.gauge-ring{
+  position:absolute;left:12px;top:24px;width:76px;height:76px;border-radius:50%;
+  background:conic-gradient(#0a84ff 0deg var(--gv,#0deg),#333b49 0deg);
+  display:flex;align-items:center;justify-content:center;
+}
+.gauge-ring::before{content:"";position:absolute;width:58px;height:58px;border-radius:50%;background:#1f242e}
+.gauge-val{position:relative;font-size:16px;font-weight:800;color:#7dd3fc}
+.gauge-val small{font-size:8px;color:#8b96a8;font-weight:400}
+.needle{
+  position:absolute;left:50%;top:50%;width:2px;height:26px;background:#fff;
+  transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(var(--nd,0deg));
+  transition:transform 1.2s cubic-bezier(.34,1.2,.4,1);
+}
+.needle::after{content:"";position:absolute;left:50%;top:100%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#fff}
+.lv-slider{left:126px;top:44px;width:104px;height:106px}
+.lv-slider .val{font-size:22px;font-weight:800;color:#e8ecf3;margin:2px 0 6px}
+.lv-slider .val small{font-size:9px;color:#8b96a8}
+.lv-slider input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:4px;
+  background:linear-gradient(90deg,#0a84ff var(--sl,50%),#333b49 var(--sl,50%));outline:none;
+}
+.lv-slider input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;
+  border:3px solid #0a84ff;box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer;
+}
+.lv-slider input::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #0a84ff;cursor:pointer}
+.lv-swt{left:10px;top:158px;width:106px;height:52px}
+.switch{position:relative;display:inline-block;width:38px;height:20px;margin-top:8px}
+.switch input{display:none}
+.switch .sl{
+  position:absolute;inset:0;border-radius:999px;background:#333b49;transition:.25s;cursor:pointer;
+}
+.switch .sl::before{
+  content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.25s;
+}
+.switch input:checked+.sl{background:#0a84ff}
+.switch input:checked+.sl::before{transform:translateX(18px)}
+.lv-swt .st{position:absolute;left:50px;top:16px;font-size:11px;color:#8b96a8}
+.lv-swt .st.on{color:#7dd3fc}
+.lv-chart{left:126px;top:158px;width:104px;height:52px}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:24px;margin-top:6px}
+.chart-bars i{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(180deg,#7dd3fc,#0a84ff);height:40%;transition:height 1s ease}
+.lv-btns{left:10px;top:220px;width:220px;height:44px;display:flex;gap:10px}
+.lv-btn{
+  flex:1;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#04121a;
+  background:linear-gradient(180deg,#4cc9f0,#0a84ff);box-shadow:0 3px 0 #063d7a;transition:transform .08s;
+}
+.lv-btn.off{background:linear-gradient(180deg,#5b6472,#3b4350);color:#dbe2ea;box-shadow:0 3px 0 #23272f}
+.lv-btn:active{transform:translateY(2px);box-shadow:0 1px 0}
+.lv-foot{position:absolute;left:0;bottom:8px;width:240px;text-align:center;font-size:9px;color:#5c6678;letter-spacing:2px}
+
+/* ============ 场景4: 图形测试 (03_display_graphics) ============ */
+.scene-gfx{background:#000}
+.scene-gfx canvas{display:block}
+
+/* ================= 板载外设 ================= */
+.rgb-led{
+  position:absolute;left:16px;top:372px;width:15px;height:15px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff 0 8%,#ff1744 60%);
+  box-shadow:0 0 8px 2px rgba(255,23,68,.7),inset 0 -1px 2px rgba(0,0,0,.5);
+  animation:rgbspin 4s linear infinite;
+}
+@keyframes rgbspin{
+  0%{filter:hue-rotate(0) }25%{filter:hue-rotate(90deg)}50%{filter:hue-rotate(180deg)}
+  75%{filter:hue-rotate(270deg)}100%{filter:hue-rotate(360deg)}
+}
+.rgb-tag{position:absolute;left:36px;top:374px;font-size:5.5px;color:#9db3a1;letter-spacing:.5px}
+.tf-slot{
+  position:absolute;right:14px;top:368px;width:26px;height:22px;border-radius:3px;
+  background:linear-gradient(180deg,#0b2c1e,#0a2618);border:1px solid #0a3221;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.06);
+}
+.tf-slot .hole{position:absolute;left:3px;top:4px;width:20px;height:10px;border-radius:2px;background:#000;box-shadow:none}
+.tf-slot span{position:absolute;left:8px;top:-9px;font-size:5px;color:#9db3a1}
+/* ESP32 模块 */
+.module{position:absolute;left:64px;top:330px;width:112px}
+.shield{
+  width:112px;height:44px;border-radius:4px;
+  background:linear-gradient(180deg,#d9dee4 0%,#aeb6bf 30%,#8d959f 70%,#7c848e 100%);
+  border:1px solid #565e68;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.65),0 3px 6px rgba(0,0,0,.4);
+  position:relative;overflow:hidden;
+}
+.shield::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.5) 0 2px,transparent 2.5px);
+  background-size:10px 10px;opacity:.5;
+}
+.shield-text{position:absolute;top:15px;left:0;width:100%;text-align:center;font-size:6px;color:#2c3238;letter-spacing:.5px;font-weight:700;z-index:1;background:rgba(220,226,232,.75)}
+.antenna{width:112px;height:28px;margin-top:2px;background:#0a2c1e;border-radius:0 0 4px 4px;overflow:hidden;position:relative}
+.antenna svg{position:absolute;left:8px;top:4px;opacity:.9}
+.antenna::after{content:"";position:absolute;right:8px;top:9px;width:22px;height:10px;border-radius:2px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.12)}
+/* USB-C */
+.usb{
+  position:absolute;left:96px;bottom:0;width:48px;height:16px;
+  background:linear-gradient(180deg,#e8ecf1,#9aa2ad 60%,#6b737d);
+  border-radius:0 0 6px 6px;border:1px solid #464d55;
+  box-shadow:0 4px 8px rgba(0,0,0,.5);
+}
+.usb::after{
+  content:"";position:absolute;left:50%;top:4px;width:22px;height:9px;transform:translateX(-50%);
+  background:#2e343b;border-radius:2px 2px 0 0;
+}
+.usb::before{content:"";position:absolute;left:50%;top:9px;width:7px;height:3px;transform:translateX(-50%);background:#101316;border-radius:1px}
+/* 排针焊盘 */
+.pads{position:absolute;left:10px;top:390px;width:220px;height:10px;display:flex;justify-content:space-between}
+.pad{
+  width:9px;height:10px;border-radius:2px;
+  background:linear-gradient(180deg,#e8c86b,#b98f2f 55%,#8a6a1e);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 1px 2px rgba(0,0,0,.5);
+  position:relative;
+}
+.pad::after{content:attr(data-g);position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:4.5px;color:#c2d3c6;white-space:nowrap}
+.gnd-row{position:absolute;right:8px;top:352px;font-size:5.5px;color:#9db3a1}
+
+/* ================= 侧边信息 ================= */
+aside{
+  flex:0 1 340px;min-width:290px;display:flex;flex-direction:column;gap:16px;padding-top:6px;
+}
+.panel{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:18px 18px;
+  backdrop-filter:blur(6px);
+}
+.panel h3{font-size:14px;color:#9fd8f5;margin-bottom:12px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.panel h3::before{content:"";width:4px;height:14px;border-radius:2px;background:linear-gradient(180deg,#22d3ee,#0ea5e9)}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:12.5px}
+.spec dt{color:#8aa0b5}
+.spec dd{color:#e6edf3;text-align:right;font-family:Consolas,monospace;font-size:12px}
+.desc{font-size:13px;line-height:1.85;color:#c3d2de}
+.desc b{color:#7dd3fc}
+.desc .path{display:block;margin-top:8px;font-family:Consolas,monospace;font-size:11px;color:#64748b;word-break:break-all}
+.hint{font-size:11.5px;color:#5f7488;text-align:center;margin-top:2px}
+@media (max-width:900px){aside{flex:1 1 100%;max-width:480px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ESP32-2432S0248R-PLUS 显示效果图</h1>
+  <p><b>2.8" TFT</b> · 240×320 · ST7789 + XPT2046 电阻触摸 · ESP32-WROOM-32E</p>
+</header>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-scene="clock"><span class="dot"></span>天气时钟 · 27_Desktop_Display</div>
+  <div class="tab" data-scene="phone"><span class="dot"></span>拨号界面 · 28_display_phonecall</div>
+  <div class="tab" data-scene="lvgl"><span class="dot"></span>LVGL 控件 · 31_LVGL_Demos</div>
+  <div class="tab" data-scene="gfx"><span class="dot"></span>图形测试 · 03_display_graphics</div>
+</div>
+
+<main>
+  <!-- ================= 板卡 ================= -->
+  <div class="stage">
+    <div class="board">
+      <div class="pcb">
+        <div class="hole h1"></div><div class="hole h2"></div><div class="hole h3"></div><div class="hole h4"></div>
+
+        <div class="silk silk-main">ESP32-2432S0248R-PLUS</div>
+        <div class="silk silk-sub">ST7789 2.8" TFT · XPT2046 Touch · ESP32-WROOM-32E</div>
+        <div class="silk silk-mod">REV 1.0</div>
+
+        <!-- 屏幕 -->
+        <div class="screen-bezel">
+          <div class="screen" id="screen">
+            <div class="screen-scale">
+
+              <!-- 场景1: 天气时钟 -->
+              <div class="scene scene-clock active" id="scene-clock">
+                <div class="clk-city" id="city">深圳</div>
+                <div class="clk-aqi">优 <sub>PM2.5 35</sub></div>
+                <svg class="clk-weather" viewBox="0 0 40 40">
+                  <circle cx="20" cy="14" r="6" fill="#fbbf24"/>
+                  <g stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round">
+                    <line x1="20" y1="3" x2="20" y2="7"/><line x1="20" y1="21" x2="20" y2="25"/>
+                    <line x1="9" y1="14" x2="13" y2="14"/><line x1="27" y1="14" x2="31" y2="14"/>
+                    <line x1="12" y1="6" x2="15" y2="9"/><line x1="28" y1="6" x2="25" y2="9"/>
+                    <line x1="12" y1="22" x2="15" y2="19"/><line x1="28" y1="22" x2="25" y2="19"/>
+                  </g>
+                  <path d="M8 26 a10 10 0 0 1 19 -3 a8 8 0 0 1 3 15 H9 a6 6 0 0 1 -1 -12 z" fill="#cbd5e1"/>
+                  <path d="M13 33 q6 -4 11 -1" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                </svg>
+
+                <div class="banner">
+                  <div class="banner-track" id="bannerText">实时天气 · 晴转多云 32℃/26℃ · 湿度 68% · 东南风 2级 · 紫外线较强，请注意防晒；晚间有阵雨，出行请携带雨具。  &nbsp;&nbsp;|&nbsp;&nbsp;  实时天气 · 晴转多云 32℃/26℃ · 湿度 68% · 东南风 2级 · 紫外线较强，请注意防晒；晚间有阵雨，出行请携带雨具。  &nbsp;&nbsp;|&nbsp;&nbsp;</div>
+                </div>
+
+                <div class="clk-time">
+                  <span class="h" id="hour">08:00</span><span class="s" id="sec">00</span>
+                </div>
+                <div class="clk-date" id="date">8月13日</div>
+                <div class="clk-week" id="week">周四</div>
+
+                <div class="weather-row wr-temp">
+                  <svg class="ico" viewBox="0 0 30 30">
+                    <circle cx="15" cy="10" r="5.5" fill="#fbbf24"/>
+                    <g stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round">
+                      <line x1="15" y1="1" x2="15" y2="4"/><line x1="15" y1="16" x2="15" y2="19"/>
+                      <line x1="5" y1="10" x2="8" y2="10"/><line x1="22" y1="10" x2="25" y2="10"/>
+                      <line x1="8" y1="3" x2="10" y2="5"/><line x1="22" y1="3" x2="20" y2="5"/>
+                    </g>
+                  </svg>
+                  <div class="val" id="tempVal">32℃</div>
+                  <div class="track"><i id="tempBar"></i></div>
+                </div>
+
+                <div class="weather-row wr-hum">
+                  <svg class="ico" viewBox="0 0 30 30">
+                    <path d="M15 3 C15 3 7 13 7 19 a8 8 0 0 0 16 0 C23 13 15 3 15 3 z" fill="#38bdf8"/>
+                    <path d="M15 25 a5 5 0 0 1 -5 -5" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                  </svg>
+                  <div class="val" id="humVal">68%</div>
+                  <div class="track"><i id="humBar"></i></div>
+                </div>
+
+                <!-- 宇航员动画 -->
+                <svg class="astro" viewBox="0 0 100 112">
+                  <g class="astro-bob">
+                    <rect x="28" y="6" width="44" height="26" rx="8" fill="#8f97a3" stroke="#6b7380" stroke-width="2"/>
+                    <rect x="36" y="2" width="28" height="8" rx="4" fill="#aab2bf"/>
+                    <circle cx="40" cy="18" r="4" fill="#c7ced9"/><circle cx="52" cy="18" r="4" fill="#c7ced9"/>
+                    <circle cx="50" cy="34" r="21" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                    <circle cx="50" cy="34" r="14" fill="#ffce6b" stroke="#e8a93c" stroke-width="1.5"/>
+                    <path d="M44 38 q6 4 12 0" stroke="#b5791e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                    <path d="M30 52 q-6 8 -4 18 l4 26 h40 l4 -26 q2 -10 -4 -18 z" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                    <rect x="44" y="56" width="12" height="9" rx="1" fill="#f5f7fa" stroke="#b8c0cc" stroke-width="1"/>
+                    <rect x="46" y="58" width="8" height="5" rx="1" fill="#e11d48"/>
+                    <g class="armR">
+                      <path d="M70 56 q12 -2 14 8 l2 10 q1 6 -5 7 l-3 -14 q-4 -4 -8 -4" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                      <circle cx="83" cy="81" r="5" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                    </g>
+                    <path d="M38 94 l-2 12 q0 4 5 4 l3 -12" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                    <path d="M62 94 l2 12 q0 4 -5 4 l-3 -12" fill="#eef1f6" stroke="#b8c0cc" stroke-width="2"/>
+                  </g>
+                </svg>
+              </div>
+
+              <!-- 场景2: 拨号界面 -->
+              <div class="scene scene-phone" id="scene-phone">
+                <div class="ph-status"><span>PHONE</span><span id="phTime">--:--</span></div>
+                <div class="ph-screen">
+                  <div class="ph-num" id="phNum">&nbsp;</div>
+                  <div>
+                    <div class="ph-call" id="phCalling">正在呼叫…</div>
+                    <div class="ph-wave" id="phWave"><i></i><i></i><i></i></div>
+                  </div>
+                </div>
+                <div class="ph-keypad">
+                  <div class="ph-grid">
+                    <button class="ph-key" data-k="1">1</button><button class="ph-key" data-k="2">2</button><button class="ph-key" data-k="3">3</button>
+                    <button class="ph-key" data-k="4">4</button><button class="ph-key" data-k="5">5</button><button class="ph-key" data-k="6">6</button>
+                    <button class="ph-key" data-k="7">7</button><button class="ph-key" data-k="8">8</button><button class="ph-key" data-k="9">9</button>
+                    <button class="ph-key" data-k="*">*</button><button class="ph-key" data-k="0">0</button><button class="ph-key" data-k="#">#</button>
+                  </div>
+                  <div class="ph-actions">
+                    <button class="ph-action ph-hang" id="phHang">挂断</button>
+                    <button class="ph-action ph-dial" id="phDial">拨打</button>
+                    <button class="ph-action ph-del" id="phDel">删除</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 场景3: LVGL 控件 -->
+              <div class="scene scene-lvgl" id="scene-lvgl">
+                <div class="lv-header">
+                  <span class="t">Smart Home</span>
+                  <span class="tm" id="lvTime">20:15</span>
+                </div>
+
+                <div class="lv-card lv-gauge">
+                  <div class="cap">室内温度</div>
+                  <div class="gauge-ring" id="gaugeRing" style="--gv:93.6deg">
+                    <span class="gauge-val" id="gaugeVal">26<small>℃</small></span>
+                    <span class="needle" id="gaugeNeedle" style="--nd:93.6deg"></span>
+                  </div>
+                </div>
+
+                <div class="lv-card lv-slider">
+                  <div class="cap">屏幕亮度</div>
+                  <div class="val" id="brightVal">60<small>%</small></div>
+                  <input type="range" id="brightSlider" min="0" max="100" value="60" style="--sl:60%">
+                </div>
+
+                <div class="lv-card lv-swt">
+                  <div class="cap">Wi-Fi</div>
+                  <label class="switch"><input type="checkbox" id="wifiSw" checked><span class="sl"></span></label>
+                  <span class="st on" id="wifiState">已连接</span>
+                </div>
+
+                <div class="lv-card lv-chart">
+                  <div class="cap">今日用电 (kWh)</div>
+                  <div class="chart-bars" id="chartBars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+
+                <div class="lv-card lv-btns">
+                  <button class="lv-btn" id="btnOn">开灯</button>
+                  <button class="lv-btn off" id="btnOff">关灯</button>
+                </div>
+                <div class="lv-foot">LVGL v8 · 16MB RGB565</div>
+              </div>
+
+              <!-- 场景4: 图形测试 -->
+              <div class="scene scene-gfx" id="scene-gfx">
+                <canvas id="gfxCanvas" width="240" height="320"></canvas>
+              </div>
+
+            </div>
+            <div class="ripple-layer" id="rippleLayer"></div>
+            <div class="screen-glare"></div>
+          </div>
+        </div>
+
+        <!-- RGB LED -->
+        <div class="rgb-led"></div>
+        <div class="rgb-tag">RGB LED</div>
+        <div class="gnd-row">GND · 5V · 3V3</div>
+
+        <!-- TF 卡槽 -->
+        <div class="tf-slot"><div class="hole"></div><span>TF</span></div>
+
+        <!-- ESP32 模块 -->
+        <div class="module">
+          <div class="shield"><div class="shield-text">ESP32-WROOM-32E</div></div>
+          <div class="antenna">
+            <svg width="96" height="22" viewBox="0 0 96 22">
+              <path d="M6 4 H28 M6 11 H28 M6 18 H28" stroke="#c9a84c" stroke-width="2"/>
+              <path d="M8 6 h18 M8 13 h18 M8 20 h18" stroke="#0a2c1e" stroke-width="2"/>
+              <rect x="34" y="2" width="58" height="18" rx="3" fill="none" stroke="#c9a84c" stroke-width="2"/>
+              <path d="M40 5 h40 M40 11 h40 M40 17 h40" stroke="#c9a84c" stroke-width="1" stroke-dasharray="3 3"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- USB-C -->
+        <div class="usb"></div>
+
+        <!-- 排针 -->
+        <div class="pads" id="pads"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 侧边信息 ================= -->
+  <aside>
+    <div class="panel">
+      <h3>板卡规格</h3>
+      <dl class="spec">
+        <dt>主控</dt><dd>ESP32-WROOM-32E (双核 240MHz · 4MB Flash)</dd>
+        <dt>屏幕</dt><dd>2.8" TFT LCD · 240×320</dd>
+        <dt>驱动</dt><dd>ST7789 (SPI) · 背光 IO21</dd>
+        <dt>触摸</dt><dd>XPT2046 电阻触摸</dd>
+        <dt>外设</dt><dd>USB Type-C · TF 卡槽 · RGB LED · 排针扩展</dd>
+        <dt>尺寸</dt><dd>86 × 50 mm</dd>
+      </dl>
+    </div>
+
+    <div class="panel">
+      <h3>当前场景</h3>
+      <p class="desc" id="sceneDesc"></p>
+    </div>
+
+    <p class="hint">💡 点击屏幕可模拟触摸 · 拨号 / LVGL 场景支持交互</p>
+  </aside>
+</main>
+
+<script>
+/* ==================== 场景切换 ==================== */
+var scenes = ['clock','phone','lvgl','gfx'];
+var sceneInfo = {
+  clock:{
+    title:'天气时钟桌面',
+    desc:'复刻 <b>27_Desktop_Display</b>：显示城市、PM2.5 空气质量、天气图标与滚动实时播报，大号数字时钟实时走动，底部为温 / 湿度及进度条，右下角宇航员逐帧动画。',
+    path:'Arduino/demos/27_Desktop_Display/DesktopDisplay/DesktopDisplay.ino'
+  },
+  phone:{
+    title:'电话拨号界面',
+    desc:'复刻 <b>28_display_phonecall</b>：蓝色拨号盘 + 数字按键，点击按键输入号码，<b>拨打</b> 绿色键呼叫并显示波纹动画，<b>挂断</b> 红色键结束呼叫，<b>删除</b> 灰色键退格。',
+    path:'Arduino/demos/28_display_phonecall/display_phonecall/display_phonecall.ino'
+  },
+  lvgl:{
+    title:'LVGL 智能家居控件',
+    desc:'仿 <b>31_LVGL_Demos</b> 风格：表盘仪表（温度）、亮度滑杆、Wi-Fi 开关与柱状图实时动画，按钮带按压缩放反馈，暗色主题。',
+    path:'Arduino/demos/31_LVGL_Demos/LVGL_Demos/LVGL_Demos.ino'
+  },
+  gfx:{
+    title:'图形绘制测试',
+    desc:'复刻 <b>03_display_graphics</b> 的循环用例：整屏填色 → 文字 → 斜线扇形 → 网格 → 嵌套矩形 → 圆形阵列 → 三角与圆角矩形，无限循环播放。',
+    path:'Arduino/demos/03_display_graphics/display_graphics/display_graphics.ino'
+  }
+};
+
+function switchScene(name){
+  document.querySelectorAll('.scene').forEach(function(s){s.classList.toggle('active', s.id==='scene-'+name);});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active', t.dataset.scene===name);});
+  var info = sceneInfo[name];
+  document.getElementById('sceneDesc').innerHTML = '<b>'+info.title+'</b><br>'+info.desc+'<span class="path">'+info.path+'</span>';
+}
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){ switchScene(t.dataset.scene); });
+});
+switchScene('clock');
+
+/* ==================== 触摸波纹 ==================== */
+var screenEl = document.getElementById('screen');
+var rippleLayer = document.getElementById('rippleLayer');
+screenEl.addEventListener('pointerdown', function(e){
+  var r = screenEl.getBoundingClientRect();
+  var x = (e.clientX - r.left)/r.width*240;
+  var y = (e.clientY - r.top)/r.height*320;
+  var d = document.createElement('div');
+  d.className='ripple';
+  d.style.left=x+'px'; d.style.top=y+'px';
+  rippleLayer.appendChild(d);
+  setTimeout(function(){ d.remove(); }, 720);
+});
+
+/* ==================== 天气时钟 ==================== */
+var hourEl=document.getElementById('hour'), secEl=document.getElementById('sec');
+var dateEl=document.getElementById('date'), weekEl=document.getElementById('week');
+var tempVal=document.getElementById('tempVal'), tempBar=document.getElementById('tempBar');
+var humVal=document.getElementById('humVal'), humBar=document.getElementById('humBar');
+var WEEKS=['日','一','二','三','四','五','六'];
+function pad(n){return (n<10?'0':'')+n}
+function tickClock(){
+  var d=new Date();
+  hourEl.textContent=pad(d.getHours())+':'+pad(d.getMinutes());
+  secEl.textContent=pad(d.getSeconds());
+  dateEl.textContent=(d.getMonth()+1)+'月'+d.getDate()+'日';
+  weekEl.textContent='周'+WEEKS[d.getDay()];
+}
+tickClock();
+setInterval(tickClock,1000);
+
+/* 温湿度缓慢变化 */
+var tBase=32,hBase=68,tick=0;
+setInterval(function(){
+  tick++;
+  var t=Math.round(tBase + Math.sin(tick/5)*2);
+  var h=Math.round(hBase + Math.sin(tick/7+1)*6);
+  tempVal.innerHTML=t+'<b>℃</b>';
+  humVal.innerHTML=h+'<b>%</b>';
+  tempBar.style.width=Math.min(100, (t-5)*3.3)+'%';
+  humBar.style.width=h+'%';
+}, 3000);
+tempBar.style.width='89%'; humBar.style.width='68%';
+
+/* ==================== 拨号界面 ==================== */
+var phNum=document.getElementById('phNum'), phCalling=document.getElementById('phCalling');
+var phWave=document.getElementById('phWave'), phTime=document.getElementById('phTime');
+var calling=false, num='';
+setInterval(function(){ phTime.textContent=pad(new Date().getHours())+':'+pad(new Date().getMinutes()); },1000);
+function redrawNum(){ phNum.textContent = num ? num : '\u00A0'; }
+document.querySelectorAll('.ph-key').forEach(function(k){
+  k.addEventListener('click', function(){
+    if(calling) return;
+    if(num.replace(/\D/g,'').length>=11) return;
+    num+=k.dataset.k; redrawNum();
+  });
+});
+document.getElementById('phDel').addEventListener('click', function(){ if(calling) return; num=num.slice(0,-1); redrawNum(); });
+document.getElementById('phDial').addEventListener('click', function(){
+  var digits=num.replace(/\D/g,'');
+  if(!digits.length) return;
+  calling=true;
+  phCalling.classList.add('show'); phCalling.textContent='正在呼叫 '+digits+' …';
+  phWave.classList.add('show');
+});
+document.getElementById('phHang').addEventListener('click', function(){
+  calling=false; phCalling.classList.remove('show'); phWave.classList.remove('show');
+});
+
+/* ==================== LVGL 场景 ==================== */
+var lvTime=document.getElementById('lvTime');
+setInterval(function(){
+  lvTime.textContent=pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+},1000);
+/* 表盘 */
+var gaugeVal=document.getElementById('gaugeVal'), gaugeRing=document.getElementById('gaugeRing'), gaugeNeedle=document.getElementById('gaugeNeedle');
+var tempNow=26;
+setInterval(function(){
+  tempNow=Math.max(18,Math.min(34, tempNow + Math.round(Math.random()*4-2)));
+  var deg=(tempNow-0)*3.6;
+  gaugeVal.innerHTML=tempNow+'<small>℃</small>';
+  gaugeRing.style.setProperty('--gv', deg+'deg');
+  gaugeNeedle.style.setProperty('--nd', deg+'deg');
+}, 2200);
+/* 滑杆 */
+var brightSlider=document.getElementById('brightSlider'), brightVal=document.getElementById('brightVal');
+brightSlider.addEventListener('input', function(){
+  brightVal.innerHTML=brightSlider.value+'<small>%</small>';
+  brightSlider.style.setProperty('--sl', brightSlider.value+'%');
+});
+/* 开关 */
+var wifiSw=document.getElementById('wifiSw'), wifiState=document.getElementById('wifiState');
+wifiSw.addEventListener('change', function(){
+  var on=wifiSw.checked;
+  wifiState.textContent=on?'已连接':'未连接';
+  wifiState.classList.toggle('on',on);
+});
+/* 柱状图 */
+var bars=document.querySelectorAll('#chartBars i');
+setInterval(function(){
+  bars.forEach(function(b){ b.style.height=(25+Math.random()*70)+'%'; });
+}, 1600);
+/* 按钮 */
+document.getElementById('btnOn').addEventListener('click', function(){
+  this.style.background='linear-gradient(180deg,#fde047,#f59e0b)';
+  setTimeout(function(){ document.getElementById('btnOn').style.background=''; }, 300);
+});
+document.getElementById('btnOff').addEventListener('click', function(){
+  this.style.background='linear-gradient(180deg,#f87171,#dc2626)';
+  setTimeout(function(){ document.getElementById('btnOff').style.background=''; }, 300);
+});
+
+/* ==================== 排针焊盘 ==================== */
+(function(){
+  var names=['3V3','GND','14','12','13','15','2','4','RX2','TX2','21','22','23','5','18','19'];
+  var box=document.getElementById('pads');
+  var per=names.map(function(g){var s=document.createElement('span');s.className='pad';s.dataset.g=g;return s;});
+  per.forEach(function(p){box.appendChild(p);});
+})();
+
+/* ==================== 图形测试 (Canvas) ==================== */
+var gfx = document.getElementById('gfxCanvas');
+var ctx = gfx.getContext('2d');
+var COLORS={BLACK:'#000',RED:'#f80000',GREEN:'#07e000',BLUE:'#0000f8',CYAN:'#07fff8',
+            MAGENTA:'#f800f8',YELLOW:'#ffe000',WHITE:'#fff',ORANGE:'#fc7d31',GREY:'#847e87'};
+var gfxActive=false, gPhase=0, gT=0, gStart=0, phaseDur=0;
+var PHASES=[
+  {name:'fill', dur:2600, fn:function(t){ /* 填色循环 */ }},
+  {name:'text', dur:3400, fn:function(t){}},
+  {name:'lines',dur:3000, fn:function(t){}},
+  {name:'grid', dur:900,  fn:function(t){}},
+  {name:'rect', dur:1400, fn:function(t){}},
+  {name:'circles',dur:1500,fn:function(t){}},
+  {name:'tri', dur:1600, fn:function(t){}},
+  {name:'rrect',dur:1600, fn:function(t){}}
+];
+function drawGFX(t){
+  var p=PHASES[gPhase], pr=(t-gStart)/p.dur;
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,240,320);
+  if(p.name==='fill'){
+    var seq=[COLORS.BLACK,COLORS.RED,COLORS.GREEN,COLORS.BLUE,COLORS.WHITE,COLORS.BLACK];
+    var idx=Math.min(seq.length-1, Math.floor(pr*seq.length));
+    ctx.fillStyle=seq[idx]; ctx.fillRect(0,0,240,320);
+    ctx.fillStyle=COLORS.BLACK;
+    ctx.font='12px monospace';
+    ctx.fillText('FILL SCREEN TEST',70,20);
+  } else if(p.name==='text'){
+    ctx.fillStyle=COLORS.WHITE; ctx.font='13px monospace'; ctx.fillText('Hello World!',2,16);
+    ctx.fillStyle=COLORS.YELLOW; ctx.font='13px monospace'; ctx.fillText('1234.56',2,34);
+    ctx.fillStyle=COLORS.RED; ctx.font='20px monospace'; ctx.fillText('0xDEADBEF',2,62);
+    ctx.fillStyle=COLORS.BLUE; ctx.font='26px monospace'; ctx.fillText('apmp',2,96);
+    ctx.fillStyle=COLORS.GREEN; ctx.font='12px monospace';
+    var lines=['I implore thee,','my foonting turlingdromes.','And hooptiously drangle me','with crinkly bindlewurdles,','Or I will rend thee','in the gobberwarts','with my blurglecruncheon,','see if I do not!'];
+    lines.forEach(function(l,i){ ctx.fillText(l,2,118+i*15); });
+    ctx.fillStyle=COLORS.CYAN; ctx.font='12px monospace';
+    ctx.fillText('ROT '+Math.floor(pr*4),180,300);
+  } else if(p.name==='lines'){
+    var i=Math.floor(pr*48)*5+5;
+    ctx.strokeStyle=COLORS.GREEN; ctx.lineWidth=1; ctx.beginPath();
+    for(var j=5;j<=i;j+=5){ctx.moveTo(0,0);ctx.lineTo(j,319);}
+    for(j=319;j>=320-i;j-=5){ctx.moveTo(0,0);ctx.lineTo(239,j);}
+    ctx.stroke();
+    ctx.strokeStyle=COLORS.RED; ctx.beginPath();
+    for(j=239;j>=240-i;j-=5){ctx.moveTo(239,0);ctx.lineTo(j,319);}
+    for(j=319;j>=320-i;j-=5){ctx.moveTo(239,0);ctx.lineTo(0,j);}
+    ctx.stroke();
+    ctx.strokeStyle=COLORS.YELLOW; ctx.beginPath();
+    for(j=5;j<=i;j+=5){ctx.moveTo(0,319);ctx.lineTo(j,0);}
+    for(j=5;j<=i;j+=5){ctx.moveTo(0,319);ctx.lineTo(239,j);}
+    ctx.stroke();
+  } else if(p.name==='grid'){
+    ctx.strokeStyle=COLORS.GREEN; ctx.lineWidth=1;
+    for(var y=0;y<320;y+=5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(240,y);ctx.stroke();}
+    ctx.strokeStyle=COLORS.BLUE;
+    for(var x=0;x<240;x+=5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,320);ctx.stroke();}
+  } else if(p.name==='rect'){
+    var n=Math.floor(pr*30);
+    ctx.strokeStyle=COLORS.GREEN; ctx.lineWidth=1;
+    for(var i2=0;i2<=n;i2+=4){
+      ctx.strokeRect(i2,40+i2,240-2*i2,240-2*i2);
+    }
+  } else if(p.name==='circles'){
+    ctx.fillStyle=COLORS.MAGENTA;
+    var on=Math.floor(pr*8);
+    for(var i3=0;i3<240;i3+=20){
+      for(var j3=0;j3<320;j3+=20){
+        if(Math.floor((i3/20+j3/20)%8)<on) {ctx.beginPath();ctx.arc(i3,j3,10,0,7);ctx.fill();}
+      }
+    }
+  } else if(p.name==='tri'){
+    var n2=Math.floor(pr*24)*5+5;
+    for(var s=n2;s>0;s-=5){
+      ctx.fillStyle='rgb('+(s+64)+','+s+','+s+')';
+      ctx.beginPath();
+      ctx.moveTo(120,159-s); ctx.lineTo(120-s,159+s); ctx.lineTo(120+s,159+s);
+      ctx.fill();
+      ctx.fillStyle='rgb('+s+',0,'+s+')';
+      ctx.fill();
+    }
+  } else if(p.name==='rrect'){
+    var n3=Math.floor(pr*30);
+    for(var i4=0;i4<=n3;i4+=4){
+      ctx.fillStyle='rgb('+(255-i4)+','+(160-i4)+',0)';
+      ctx.beginPath();
+      var x=i4, y=40+i4, w=240-2*i4, h=240-2*i4, r=8;
+      ctx.roundRect(x,y,w,h,r);
+      ctx.fill();
+    }
+  }
+}
+function gfxLoop(now){
+  if(!gfxActive){
+    requestAnimationFrame(gfxLoop); return;
+  }
+  if(!gStart){gStart=now;gT=now;}
+  var p=PHASES[gPhase];
+  if(now-gStart>=p.dur){
+    gPhase=(gPhase+1)%PHASES.length;
+    gStart=now;
+  }
+  drawGFX(now);
+  requestAnimationFrame(gfxLoop);
+}
+requestAnimationFrame(gfxLoop);
+function syncGFX(){
+  gfxActive=document.getElementById('scene-gfx').classList.contains('active');
+  if(gfxActive && !gStart){gStart=performance.now();}
+}
+setInterval(syncGFX,400);
+
+/* 初始状态 */
+setTimeout(function(){ tempVal.innerHTML='32<b>℃</b>'; humVal.innerHTML='68<b>%</b>'; },100);
+</script>
+</body>
+</html>

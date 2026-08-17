@@ -1,0 +1,7 @@
+## 拉取 u8g2 + ESP-IDF HAL
+## 通过 ESP Component Registry 获取 (idf.py 会自动下载到 managed_components/)
+dependencies:
+  idf:
+    version: ">=5.0"
+  # u8g2 单色显示库 + 针对 ESP-IDF 的 I2C/SPI/Delay/GPIO HAL 封装
+  mringwal/u8g2-hal-esp-idf: "^0.1.0"
